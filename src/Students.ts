@@ -1,6 +1,9 @@
-import _ from "lodash";
 import chalk from 'chalk';
 
+/**
+ * @description Student class is responsible for storing all students in the
+ * calculation, and providing functions to filter students as needed
+ */
 export class Students {
   /** @private
    * Singleton instance of students class
@@ -8,14 +11,14 @@ export class Students {
   private static _instance: Students;
 
   /** @private
-   *  Stores all students in a mapping, imported from excel files
+   *  Stores all students in an array, imported from excel files
    *  Each student is identified by it's unique NEPTUN code
    */
-  private _students: Map<string, Student>;
+  private _students: Student[];
 
 
   private constructor() {
-    this._students = new Map<string, Student>();
+    this._students = Array<Student>();
   }
 
   /**
@@ -33,7 +36,11 @@ export class Students {
    */
   public add(student: Student) {
     student.neptun = student.neptun.toUpperCase();
-    this._students.set(student.neptun, student);
+    if(!this.getByNeptun(student.neptun)){
+      this._students.push(student);
+    }else{
+      console.log(chalk.yellow('[Students]: '), `This student is already stored, Neptun: ${student.neptun}`);
+    }
   }
 
   /**
@@ -43,6 +50,22 @@ export class Students {
    */
   public getByNeptun(neptun: string): Student | undefined{
     neptun = neptun.toUpperCase();
-    return this._students.get(neptun);
+    return this._students.find(student => student.neptun === neptun);
+  }
+
+  /**
+   * @description Get's all students
+   */
+  public getAll(): Student[]{
+    return this._students;
+  }
+
+  /**
+   * @description Get's all student who's key's value
+   * @param key Key of Student type, to get students by
+   * @param value Value to be
+   */
+  public getAllBy(key: keyof Student, value: string | number | boolean): Student[] {
+    return this._students.filter(student => student[key] === value);
   }
 }

@@ -1,41 +1,41 @@
 /**
+ * Excel imported dataTypes
+ */
+type StudentGTB = {
+  neptun : string,
+  roomSenior : string,
+  cardSenior: string,
+  color : string,
+}
+
+type StudentDormitory = {
+  name : string,
+  neptun : string,
+  score: number,
+  major: string,
+  admissionType: string,
+  color: string,
+  room: number,
+}
+
+type StudentDH = {
+  neptun: string,
+  name: string,
+  zipCode: number,
+  /** Gender of this student, stored in a hungarian format (F - Male) (N - Female) */
+  gender: 'F' | 'N',
+  imsc: boolean,
+  doublePassive: boolean,
+  german: boolean
+}
+
+/**
  *  @description
  *  Stores the properties of a student
  */
-interface Student {
-  /** Unique neptun code for a student stored in a capitalized format */
-  neptun: string,
-  name: string,
-  major: string,
-  /** Gender of this student, stored in a hungarian format (F - Male) (N - Female) */
-  gender: 'F' | 'N',
-  /** Undefined if Student was not in GTB */
-  cardSenior: CardSenior | undefined,
-  /** Undefined if Student was not in GTB */
-  roomSenior: RoomSenior | undefined,
-  /** Undefined if Student is not in dormitory */
-  room: number | undefined,
-  /** Undefined if not assigned yet */
-  group: Group | undefined,
-}
 
-/**
- * @description
- * Card senior of a Student. There are 20 card seniors. Each card senior has 3 room seniors
- */
-interface CardSenior {
-  id: number,
-  name: string
-}
+type Student = StudentGTB & StudentDH & StudentDormitory;
 
-/**
- * @description
- * Room senior of a Student. Each room senior has 9 Student in 3 separate rooms
- */
-interface RoomSenior {
-  id: number,
-  name: string
-}
 
 /**
  * @description

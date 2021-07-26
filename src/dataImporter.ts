@@ -1,8 +1,5 @@
-import path from "path";
-
-const excel = require('convert-excel-to-json')
-import { Students } from "./Students";
 import chalk from "chalk";
+const excel = require('convert-excel-to-json')
 
 /**
  * @description
@@ -27,10 +24,11 @@ function importSheet(path: string, columnMap: { [key: string]: string }, sheetNa
     console.error(chalk.red('[Excel Import]: ') + "Can' t read excel file: " + path);
   }
 
-  //Get the sheet from excel, first try to get the sheet by name
-  //If no name is provided and only one sheet exists grab the first sheet
   let sheet;
   const keys = Object.keys(data);
+
+  //Get the sheet from excel, first try to get the sheet by name
+  //If no name is provided and only one sheet exists grab the first sheet
   if(sheetName){
     sheet = data[sheetName];
     if(!sheet){
@@ -55,8 +53,8 @@ function importSheet(path: string, columnMap: { [key: string]: string }, sheetNa
 export function importGTB(path: string, sheetName: string|undefined = undefined) : [StudentGTB] | undefined{
   let sheet = importSheet(path, {
     A: 'neptun',
-    B: 'roomSenior',
-    C: 'cardSenior',
+    B: 'cardSenior',
+    C: 'roomSenior',
     D: 'color'
   }, sheetName);
   if(!sheet){
@@ -80,6 +78,8 @@ export function importGTB(path: string, sheetName: string|undefined = undefined)
  * @param sheetName Name of the sheet if more than one is present in the excel
  */
 export function importDormitory(path: string, sheetName: string|undefined = undefined) : [StudentDormitory] | undefined{
+  //TODO: Currently wait list is being ignored => Everyone is gray from there
+  // Student's color on the wait list is known, maybe assign random rooms on the floor for them?
   let sheet = importSheet(path, {
     A : 'name',
     D : 'neptun',
@@ -137,35 +137,4 @@ export function importDH(path: string, sheetName: string|undefined = undefined) 
   });
   // @ts-ignore
   return sheet;
-}
-
-/**
- * Excel imported dataTypes
- */
-type StudentGTB = {
-  neptun : string,
-  roomSenior : string,
-  cardSenior: string,
-  color : string,
-}
-
-type StudentDormitory = {
-  name : string,
-  neptun : string,
-  score: number,
-  major: string,
-  admissionType: string,
-  color: string,
-  room: number,
-}
-
-type StudentDH = {
-  neptun: string,
-  name: string,
-  zipCode: number,
-  /** Gender of this student, stored in a hungarian format (F - Male) (N - Female) */
-  gender: 'F' | 'N',
-  imsc: boolean,
-  doublePassive: boolean,
-  german: boolean
 }

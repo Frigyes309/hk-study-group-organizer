@@ -1,6 +1,8 @@
-import { importDH, importDormitory } from "./dataImporter";
 import express from 'express';
 import path from 'path';
+import _ from 'lodash';
+import { Students } from "./Students";
+import { importStudents } from "./studentsImporter";
 
 const dataDir = '/Users/balint/Documents/GitHub/hk-study-group-organizer/data/';
 const app = express();
@@ -9,11 +11,24 @@ app.set('views', path.join(__dirname, '../views'));
 // sets view engine
 app.set('view engine', 'ejs');
 
-let a = importDH(path.join(dataDir, 'VIK-alapképzés-felvettek-2020A-besoroláshoz.xlsx'), 'Info');
-console.log(a!.filter((b) => {
-  return b.german ? b : undefined
-}).length);
-process.exit();
+importStudents({
+  DH: path.join(dataDir, 'VIK-alapképzés-felvettek-2020A-besoroláshoz.xlsx'),
+  Dorm: path.join(dataDir, 'Bsc-felvettek.xlsx'),
+  GTB: path.join(dataDir, 'GTB-2020-tankörbeosztáshoz.xlsx')
+}, 'Infó');
+
+
+// Create groups from GTB Students by it's cardSenior and roomSenior
+let GtbGroups = _.groupBy(Students.instance.getAll(), 'cardSenior');
+_.forEach(GtbGroups, (group, key) => {
+  // @ts-ignore
+  GtbGroups[key] = _.groupBy(GtbGroups[key], 'roomSenior');
+});
+console.log(GtbGroups);
+
+/*Students.instance.getAll().map((student) => {
+  return { x: student.room, y: student }
+});*/
 
 let colors = new Map<string, {color: string, floor: number, gtb: number}>([
   ['DrWu', {color: 'yellow', floor: 600, gtb: 0}],
