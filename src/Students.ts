@@ -1,4 +1,5 @@
 import chalk from 'chalk';
+import _ from "lodash";
 
 /**
  * @description Student class is responsible for storing all students in the
@@ -61,11 +62,36 @@ export class Students {
   }
 
   /**
-   * @description Get's all student who's key's value
-   * @param key Key of Student type, to get students by
-   * @param value Value to be
+   * @description Get's all student where the predicate returns true
+   * @param predicate Function witch iterated over each Student
    */
-  public getAllBy(key: keyof Student, value: string | number | boolean): Student[] {
-    return this._students.filter(student => student[key] === value);
+  public getAllBy(predicate: (a: Student) => boolean): Student[] {
+    return this._students.filter(predicate);
   }
+
+  /**
+   * @description Groups students who were in GTB, by its card than room seniors
+   * card-1: {
+   *   room-1: [
+   *     student-1, student-2, etc.
+   *   ],
+   *   room-2: [
+   *     student-1, student-2, etc.
+   *   ],
+   *   etc.
+   * },
+   * card-2: { etc. }
+   */
+  public getGtbSeniorGroups(): { [key: string]: {[key: string]: Student[] } } {
+    const gtbStudents = this.getAllBy(student => student.cardSenior !== '');
+    // Create groups from GTB Students by it's cardSenior and roomSenior
+    let GtbGroups = _.groupBy(gtbStudents, 'cardSenior');
+    _.forEach(GtbGroups, (group, key) => {
+      // @ts-ignore
+      GtbGroups[key] = _.groupBy(GtbGroups[key], 'roomSenior');
+    });
+    console.log();
+    return _.toPlainObject(GtbGroups);
+  }
+
 }

@@ -25,16 +25,26 @@ export function importStudents(filePaths: { DH: string, Dorm: string, GTB: strin
     process.exit(-1);
   }
 
+  let huColor = new Map<string, string>([
+    ['sárga', 'yellow'],
+    ['fekete', 'black'],
+    ['kék', 'blue'],
+    ['fehér', 'white'],
+    ['piros', 'red'],
+  ])
+
   infoDH.forEach((student) => {
 
     const studentGTB = infoGTB.find((s) => s.neptun === student.neptun);
     const studentDorm = infoDorm.find((s) => s.neptun === student.neptun);
 
+    const color = studentGTB ? huColor.get(studentGTB.color) : (studentDorm ? huColor.get(studentDorm.color) : 'gray');
+
     Students.instance.add({
       ...student,
       roomSenior: studentGTB ? studentGTB.roomSenior : '' ,
       cardSenior: studentGTB ? studentGTB.cardSenior : '',
-      color: studentGTB ? studentGTB.color : (studentDorm ? studentDorm.color : ''),
+      color: color ? color : 'gray',
       admissionType: studentDorm ?  studentDorm.admissionType : '',
       major: studentDorm ? studentDorm.major : '',
       room: studentDorm ? studentDorm.room : 0,
