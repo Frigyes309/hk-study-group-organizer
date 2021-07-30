@@ -19,25 +19,36 @@
         window.data = data;
 
         const chartData = {
-          datasets: [{
+          datasets: data.map(student => {
+            return {
+              label: undefined,
+              data: [{x: student.x ? student.x : 0, y: student.y ? student.y : 0}],
+              pointBackgroundColor: student.color,
+              pointRadius: student.color === 'violet' ? 10 : 3,
+              pointHoverRadius: student.color === 'violet' ? 10 : 3,
+            }
+          }),
+          /*datasets: [{
             label: 'Scatter Dataset',
             data: data.map(student => { return {x: student.x ? student.x : 0, y: student.y ? student.y : 0}}),
             pointBackgroundColor: function(context) {
               return data[context.dataIndex].color;
-            }
-          }],
+            },
+          }],*/
         };
         const config = {
           type: 'scatter',
           data: chartData,
           options: {
             plugins: {
+              legend: {
+                display: false
+              },
               tooltip: {
                 callbacks: {
                   label: function(context) {
-                    //debugger;
                     //return window.data[context.dataIndex];
-                    return [window.data[context.dataIndex].name, `Room: ${context.parsed.x} - Gtb: ${context.parsed.y}`]
+                    return [window.data[context.datasetIndex].name, `Room: ${context.parsed.x} - Gtb: ${context.parsed.y.toFixed(2)}`]
                   }
                 }
               }
@@ -46,12 +57,12 @@
               x: {
                 type: 'linear',
                 position: 'bottom',
-                min: 800,
-                max: 818,
+                //min: 950,
+                //max: 1050,
               },
               y: {
-                min: 10,
-                max: 19
+                //min: 0,
+                //max: 60
               }
             }
           }

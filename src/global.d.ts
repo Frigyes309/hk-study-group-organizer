@@ -36,6 +36,11 @@ type StudentDH = {
 
 type Student = StudentGTB & StudentDH & StudentDormitory;
 
+/**
+ * @description
+ * Combined student type with a vector
+ */
+type StudentVector = Student & { x: number, y: number};
 
 /**
  * @description
