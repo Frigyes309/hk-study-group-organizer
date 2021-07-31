@@ -136,15 +136,39 @@ let data = Students.instance.getAll().map((student) => {
     return {
         ...student,
         x: room,
-        y: Number(gtb) * 0.05,
+        y: Number(gtb) * 0.01,
     };
 });
 
-const groupCalculator = new Groups(data, 17);
-const groupStarts = groupCalculator.createGroups();
+const groupCalculator = new Groups(data, 16);
+const colorShowed = [
+    'black',
+    'white',
+    'gray',
+    'silver',
+    'maroon',
+    'red',
+    'purple',
+    'fushsia',
+    'green',
+    'lime',
+    'olive',
+    'yellow',
+    'navy',
+    'blue',
+    'teal',
+    'aqua',
+];
+const groups = groupCalculator.createGroups().map((group, index) => {
+    group.map((student) => {
+        student.color = colorShowed[index];
+        return student;
+    });
+    return group;
+});
 
-console.log(groupStarts);
-
+//console.log(groupStarts);
+/*
 data = data.map((s) => {
     if (groupStarts.includes(s.neptun)) {
         s.color = 'violet';
@@ -152,7 +176,7 @@ data = data.map((s) => {
     }
     return s;
 });
-
+*/
 const port = process.env.PORT || 3000;
 
 app.listen(port, () => {
@@ -164,5 +188,5 @@ app.get('/', (req, res) => {
 });
 
 app.get('/api/data', (req, res) => {
-    res.json(data);
+    res.json(groups.flat());
 });

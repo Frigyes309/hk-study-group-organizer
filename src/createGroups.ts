@@ -61,8 +61,61 @@ export class Groups {
         });
     }
 
-    public createGroups(): string[] {
-        return this.getGroupStartStudents(this._coloredStudents);
+    /**
+     * @description Creates study groups
+     * 1) Gets every group start student
+     * 2) Goes til no students remains, and for every group puts the closest student to that group
+     */
+    public createGroups(): StudentVector[][] {
+        const startStudent = this.getGroupStartStudents(this._coloredStudents);
+        if (!startStudent) {
+            console.log(chalk.red('[Create Groups]: '), 'Group start students are empty');
+            return [];
+        }
+        //Each study groups will be an array of students
+        let groups = startStudent.map((group) => {
+            const s = this._coloredStudents.find((s) => s.neptun === group);
+            if (!s) {
+                console.log(chalk.red('[Create Groups]: '), `Can't find orignal student data for neptun: ${group}`);
+                process.exit(1);
+            }
+            return [s];
+        });
+        let remainingStudents = this._coloredStudents.filter((student) => !startStudent.includes(student.neptun));
+
+        while (remainingStudents.length !== 0) {
+            groups.forEach((group) => {
+                const groupCenter = this.getGroupCenter(group);
+                const closestStudent = _.minBy(
+                    remainingStudents.map((student) => {
+                        const dist = Math.sqrt(
+                            Math.pow(student.x - groupCenter.x, 2) + Math.pow(student.y - groupCenter.y, 2),
+                        );
+                        return { student, dist };
+                    }),
+                    'dist',
+                );
+
+                if (!closestStudent) {
+                    if (remainingStudents.length !== 0) {
+                        console.log(
+                            chalk.red('[Create Groups]: '),
+                            'Closest student must exist, there are still remaining students',
+                        );
+                    }
+                    return;
+                }
+                group.push(closestStudent.student);
+                remainingStudents = remainingStudents.filter(
+                    (student) => !groups.flat().some((groupS) => groupS!.neptun === student.neptun),
+                );
+                if (remainingStudents.length === 0) {
+                    console.log(chalk.green('[Create Groups]:'), ' No students remaining for grouping');
+                    return;
+                }
+            });
+        }
+        return groups;
     }
 
     /**
@@ -115,5 +168,25 @@ export class Groups {
             startStudents.push(newStartStudent.neptun);
         }
         return startStudents;
+    }
+
+    /**
+     * For a list of student calculates the "center of mass"
+     * @param students Students to calculate for
+     * @private
+     */
+    private getGroupCenter(students: (StudentVector | undefined)[]): Vector {
+        let center = students.reduce(
+            (total, next) => {
+                if (!next) return total;
+                total.x += next.x;
+                total.y += next.y;
+                return total;
+            },
+            { x: 0, y: 0 },
+        );
+        center.x /= students.length;
+        center.y /= students.length;
+        return center;
     }
 }

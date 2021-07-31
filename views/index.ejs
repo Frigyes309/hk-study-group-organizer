@@ -24,8 +24,8 @@
               label: undefined,
               data: [{x: student.x ? student.x : 0, y: student.y ? student.y : 0}],
               pointBackgroundColor: student.color,
-              pointRadius: student.color === 'violet' ? 10 : 3,
-              pointHoverRadius: student.color === 'violet' ? 10 : 3,
+              pointRadius: 4,
+              pointHoverRadius: 4,
             }
           }),
           /*datasets: [{
@@ -57,12 +57,12 @@
               x: {
                 type: 'linear',
                 position: 'bottom',
-                min: 600,
-                max: 620,
+                min: 700,
+                max: 720,
               },
               y: {
-                min: 0,
-                max: 10
+                //min: 0,
+                //max: 10
               }
             }
           }
