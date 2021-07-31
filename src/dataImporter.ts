@@ -1,5 +1,5 @@
-import chalk from "chalk";
-const excel = require('convert-excel-to-json')
+import chalk from 'chalk';
+const excel = require('convert-excel-to-json');
 
 /**
  * @description
@@ -11,37 +11,48 @@ const excel = require('convert-excel-to-json')
  *
  * @returns excelSheet|undefined Excel sheet converted to an array of objects, object keys from columnMap
  */
-function importSheet(path: string, columnMap: { [key: string]: string }, sheetName: string|undefined = undefined, rowsToSkip = 1) : [{[key: string]: any}]|undefined{
-  const data = excel({
-    sourceFile: path,
-    header: {
-      rows: rowsToSkip
-    },
-    columnToKey: columnMap
-  });
+function importSheet(
+    path: string,
+    columnMap: { [key: string]: string },
+    sheetName: string | undefined = undefined,
+    rowsToSkip = 1,
+): [{ [key: string]: any }] | undefined {
+    const data = excel({
+        sourceFile: path,
+        header: {
+            rows: rowsToSkip,
+        },
+        columnToKey: columnMap,
+    });
 
-  if(!data){
-    console.error(chalk.red('[Excel Import]: ') + "Can' t read excel file: " + path);
-  }
-
-  let sheet;
-  const keys = Object.keys(data);
-
-  //Get the sheet from excel, first try to get the sheet by name
-  //If no name is provided and only one sheet exists grab the first sheet
-  if(sheetName){
-    sheet = data[sheetName];
-    if(!sheet){
-      console.error(chalk.red("[Excel Import]: ") + `Can't find this sheet: [${sheetName}], available names: [${keys.join()}]`);
+    if (!data) {
+        console.error(chalk.red('[Excel Import]: ') + "Can' t read excel file: " + path);
     }
-  }else{
-    if(keys.length > 1){
-      console.error(chalk.red("[Excel Import]: ") + `No sheet name is provided for import and there are multiple sheets: [${keys.join()}]`);
+
+    let sheet;
+    const keys = Object.keys(data);
+
+    //Get the sheet from excel, first try to get the sheet by name
+    //If no name is provided and only one sheet exists grab the first sheet
+    if (sheetName) {
+        sheet = data[sheetName];
+        if (!sheet) {
+            console.error(
+                chalk.red('[Excel Import]: ') +
+                    `Can't find this sheet: [${sheetName}], available names: [${keys.join()}]`,
+            );
+        }
+    } else {
+        if (keys.length > 1) {
+            console.error(
+                chalk.red('[Excel Import]: ') +
+                    `No sheet name is provided for import and there are multiple sheets: [${keys.join()}]`,
+            );
+        }
+        //In excel at least one sheet is always present
+        sheet = data[keys[0]];
     }
-    //In excel at least one sheet is always present
-    sheet = data[keys[0]];
-  }
-  return sheet;
+    return sheet;
 }
 
 /**
@@ -50,26 +61,30 @@ function importSheet(path: string, columnMap: { [key: string]: string }, sheetNa
  * @param sheetName Name of the sheet if more than one is present in the excel
  *
  */
-export function importGTB(path: string, sheetName: string|undefined = undefined) : [StudentGTB] | undefined{
-  let sheet = importSheet(path, {
-    A: 'neptun',
-    B: 'cardSenior',
-    C: 'roomSenior',
-    D: 'color'
-  }, sheetName);
-  if(!sheet){
-    console.log(chalk.red('[Excel Import]: ') + `Can't import GTB excel file: ${path}`);
-    return undefined;
-  }
-  //Convert the neptun code to uppercase format
-  sheet.map(row => {
-    return {
-      ...row,
-      neptun: row.neptun.toUpperCase()
+export function importGTB(path: string, sheetName: string | undefined = undefined): [StudentGTB] | undefined {
+    let sheet = importSheet(
+        path,
+        {
+            A: 'neptun',
+            B: 'cardSenior',
+            C: 'roomSenior',
+            D: 'color',
+        },
+        sheetName,
+    );
+    if (!sheet) {
+        console.log(chalk.red('[Excel Import]: ') + `Can't import GTB excel file: ${path}`);
+        return undefined;
     }
-  });
-  // @ts-ignore
-  return sheet;
+    //Convert the neptun code to uppercase format
+    sheet.map((row) => {
+        return {
+            ...row,
+            neptun: row.neptun.toUpperCase(),
+        };
+    });
+    // @ts-ignore
+    return sheet;
 }
 
 /**
@@ -77,31 +92,38 @@ export function importGTB(path: string, sheetName: string|undefined = undefined)
  * @param path Path to the excel file
  * @param sheetName Name of the sheet if more than one is present in the excel
  */
-export function importDormitory(path: string, sheetName: string|undefined = undefined) : [StudentDormitory] | undefined{
-  //TODO: Currently wait list is being ignored => Everyone is gray from there
-  // Student's color on the wait list is known, maybe assign random rooms on the floor for them?
-  let sheet = importSheet(path, {
-    A : 'name',
-    D : 'neptun',
-    G : 'score',
-    I : 'major',
-    K : 'admissionType',
-    L : 'color',
-    M : 'room',
-  }, sheetName);
-  if(!sheet){
-    console.log(chalk.red('[Excel Import]: ') + `Can't import Dormitory excel file: ${path}`);
-    return  undefined;
-  }
-  //Convert the neptun code to uppercase format
-  sheet.map(row => {
-    return {
-      ...row,
-      neptun: row.neptun.toUpperCase()
+export function importDormitory(
+    path: string,
+    sheetName: string | undefined = undefined,
+): [StudentDormitory] | undefined {
+    //TODO: Currently wait list is being ignored => Everyone is gray from there
+    // Student's color on the wait list is known, maybe assign random rooms on the floor for them?
+    let sheet = importSheet(
+        path,
+        {
+            A: 'name',
+            D: 'neptun',
+            G: 'score',
+            I: 'major',
+            K: 'admissionType',
+            L: 'color',
+            M: 'room',
+        },
+        sheetName,
+    );
+    if (!sheet) {
+        console.log(chalk.red('[Excel Import]: ') + `Can't import Dormitory excel file: ${path}`);
+        return undefined;
     }
-  });
-  // @ts-ignore
-  return sheet;
+    //Convert the neptun code to uppercase format
+    sheet.map((row) => {
+        return {
+            ...row,
+            neptun: row.neptun.toUpperCase(),
+        };
+    });
+    // @ts-ignore
+    return sheet;
 }
 
 /**
@@ -109,32 +131,36 @@ export function importDormitory(path: string, sheetName: string|undefined = unde
  * @param path Path to the excel file
  * @param sheetName Name of the sheet if more than one is present in the excel
  */
-export function importDH(path: string, sheetName: string|undefined = undefined) : [StudentDH] | undefined{
-  let sheet = importSheet(path, {
-    A : 'neptun',
-    B : 'name',
-    C : 'zipCode',
-    D : 'gender',
-    E : 'imsc',
-    F : 'doublePassive',
-    G : 'german',
-  }, sheetName);
-  if(!sheet){
-    console.log(chalk.red('[Excel Import]: ') + `Can't import DH excel file: ${path}`);
-    return  undefined;
-  }
-  //Convert the neptun code to uppercase format
-  // @ts-ignore
-  sheet = sheet.map(row => {
-    return {
-      ...row,
-      neptun: row.neptun.toUpperCase(),
-      gender: row.gender == 'Férfi' ? 'F' : 'N',
-      imsc: row.imsc == 'X',
-      doublePassive: row.doublePassive == 'X',
-      german: row.german == 'X',
+export function importDH(path: string, sheetName: string | undefined = undefined): [StudentDH] | undefined {
+    let sheet = importSheet(
+        path,
+        {
+            A: 'neptun',
+            B: 'name',
+            C: 'zipCode',
+            D: 'gender',
+            E: 'imsc',
+            F: 'doublePassive',
+            G: 'german',
+        },
+        sheetName,
+    );
+    if (!sheet) {
+        console.log(chalk.red('[Excel Import]: ') + `Can't import DH excel file: ${path}`);
+        return undefined;
     }
-  });
-  // @ts-ignore
-  return sheet;
+    //Convert the neptun code to uppercase format
+    // @ts-ignore
+    sheet = sheet.map((row) => {
+        return {
+            ...row,
+            neptun: row.neptun.toUpperCase(),
+            gender: row.gender == 'Férfi' ? 'F' : 'N',
+            imsc: row.imsc == 'X',
+            doublePassive: row.doublePassive == 'X',
+            german: row.german == 'X',
+        };
+    });
+    // @ts-ignore
+    return sheet;
 }

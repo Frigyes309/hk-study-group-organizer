@@ -5,6 +5,7 @@ import { Students } from './Students';
 import { importStudents } from './studentsImporter';
 import { Groups } from './createGroups';
 import chalk from 'chalk';
+import { createGroups } from '../dist/createGroups';
 
 const dataDir = '/Users/balint/Documents/GitHub/hk-study-group-organizer/data/';
 const app = express();
@@ -105,7 +106,9 @@ let data = Students.instance.getAll().map((student) => {
         let color = colors.find((c) => c.color === student.color);
         if (color) {
             //Generate a random room on that floor
-            room = color.floor + _.random(Math.min(...rooms), Math.max(...rooms));
+            //Put them in half rooms, so no overlap will generate with real dorm students, this will give them a better
+            //change to be in the same group
+            room = color.floor + _.random(Math.min(...rooms), Math.max(...rooms)) + 0.5;
         }
     }
     //If a student will be in Dormitory, but was not in GTB
@@ -142,22 +145,23 @@ let data = Students.instance.getAll().map((student) => {
 
 const groupCalculator = new Groups(data, 16);
 const colorShowed = [
-    'black',
-    'white',
-    'gray',
-    'silver',
-    'maroon',
-    'red',
-    'purple',
-    'fushsia',
-    'green',
-    'lime',
-    'olive',
-    'yellow',
-    'navy',
-    'blue',
-    'teal',
-    'aqua',
+    '#2f4f4f',
+    '#8b4513',
+    '#191970',
+    '#006400',
+    '#bdb76b',
+    '#b03060',
+    '#ff4500',
+    '#ffa500',
+    '#ffff00',
+    '#0000cd',
+    '#00ff00',
+    '#00fa9a',
+    '#00ffff',
+    '#b0c4de',
+    '#ff00ff',
+    '#1e90ff',
+    '#ee82ee',
 ];
 const groups = groupCalculator.createGroups().map((group, index) => {
     group.map((student) => {
@@ -165,6 +169,19 @@ const groups = groupCalculator.createGroups().map((group, index) => {
         return student;
     });
     return group;
+});
+
+groups.forEach((group, id) => {
+    const rooms = Object.keys(_.groupBy(group, 'room'));
+    groups.forEach((a, ix) => {
+        if (id != ix) {
+            rooms.forEach((room) => {
+                if (Object.keys(_.groupBy(a, 'room')).includes(room) && room !== '0') {
+                    console.log(room);
+                }
+            });
+        }
+    });
 });
 
 //console.log(groupStarts);

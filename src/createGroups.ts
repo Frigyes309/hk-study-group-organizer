@@ -84,28 +84,28 @@ export class Groups {
         let remainingStudents = this._coloredStudents.filter((student) => !startStudent.includes(student.neptun));
 
         while (remainingStudents.length !== 0) {
-            groups.forEach((group) => {
-                const groupCenter = this.getGroupCenter(group);
-                const closestStudent = _.minBy(
-                    remainingStudents.map((student) => {
+            remainingStudents.forEach((student) => {
+                const closestGroup = _.minBy(
+                    groups.map((group) => {
+                        const groupCenter = this.getGroupCenter(group);
                         const dist = Math.sqrt(
                             Math.pow(student.x - groupCenter.x, 2) + Math.pow(student.y - groupCenter.y, 2),
                         );
-                        return { student, dist };
+                        return { group, dist };
                     }),
                     'dist',
                 );
 
-                if (!closestStudent) {
+                if (!closestGroup) {
                     if (remainingStudents.length !== 0) {
                         console.log(
                             chalk.red('[Create Groups]: '),
-                            'Closest student must exist, there are still remaining students',
+                            'Closest group must exist, there are still remaining students',
                         );
                     }
                     return;
                 }
-                group.push(closestStudent.student);
+                closestGroup.group.push(student);
                 remainingStudents = remainingStudents.filter(
                     (student) => !groups.flat().some((groupS) => groupS!.neptun === student.neptun),
                 );
