@@ -135,6 +135,8 @@ let data = Students.instance.getAll().map((student) => {
         console.log(chalk.red('[Vector Creation]: '), 'Gtb vector axis must be a number, something went wrong');
     }
 
+    student.room = room;
+
     return {
         ...student,
         x: room,
@@ -144,7 +146,7 @@ let data = Students.instance.getAll().map((student) => {
 
 const groupCalculator = new Groups(data, 16);
 //Visually distinct colors: https://mokole.com/palette.html
-const colorShowed = [
+const colorShowed = _.shuffle([
     '#2f4f4f',
     '#8b4513',
     '#191970',
@@ -162,7 +164,7 @@ const colorShowed = [
     '#ff00ff',
     '#1e90ff',
     '#ee82ee',
-];
+]);
 const groups = groupCalculator.createGroups().map((group, index) => {
     group.map((student) => {
         student.color = colorShowed[index];
