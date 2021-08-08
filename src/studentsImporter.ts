@@ -49,6 +49,9 @@ export function importStudents(
         //TODO: Make better filter for IMSC, and German student groups
         if (student.imsc || student.german) return;
 
+        //TODO: Make better double passive student filter
+        if (student.doublePassive) return;
+
         Students.instance.add({
             ...student,
             roomSenior: studentGTB ? studentGTB.roomSenior : '',
@@ -58,6 +61,8 @@ export function importStudents(
             major: studentDorm ? studentDorm.major : '',
             room: studentDorm ? studentDorm.room : 0,
             score: studentDorm ? studentDorm.score : 0,
+            groupId: NaN,
+            trueDormitory: !!studentDorm,
         });
     });
 }

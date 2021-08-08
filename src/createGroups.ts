@@ -46,6 +46,8 @@ export class Groups {
             console.log(chalk.cyan('[Info]: '), `- ${color} student count: ${colorGroups[color].length}`);
         });
         console.log(chalk.cyan('[Info]: '), `Gray student count: ${this._grayStudents.length}`);
+        console.log(chalk.cyan('[Info]: '), ` - Female: ${this._grayStudents.filter((s) => s.gender === 'N').length}`);
+        console.log(chalk.cyan('[Info]: '), ` - Male:   ${this._grayStudents.filter((s) => s.gender === 'F').length}`);
 
         this._groupCount = groupCount;
         //Calculate the distances, ONLY for colored students
@@ -65,10 +67,13 @@ export class Groups {
      * @description Creates study groups
      * 1) Gets every group start student
      * 2) For every student searches the closest group, and puts her/him into that group
-     * 3) Put gray studens (who have no vector value), randomly to the groups
+     * 3) Put gray students (who have no vector value), randomly to the groups
      */
     public createGroups(): StudentVector[][] {
-        const startStudent = this.getGroupStartStudents(this._coloredStudents);
+        const startStudent = this.getGroupStartStudents(
+            //For the group start filter out students who are just fake in the dorm
+            this._coloredStudents.filter((student) => student.trueDormitory),
+        );
         if (!startStudent) {
             console.log(chalk.red('[Create Groups]: '), 'Group start students are empty');
             return [];
@@ -77,16 +82,23 @@ export class Groups {
         let groups = startStudent.map((group) => {
             const s = this._coloredStudents.find((s) => s.neptun === group);
             if (!s) {
-                console.log(chalk.red('[Create Groups]: '), `Can't find orignal student data for neptun: ${group}`);
+                console.log(chalk.red('[Create Groups]: '), `Can't find original student data for neptun: ${group}`);
                 process.exit(1);
             }
             return [s];
         });
-        let remainingStudents = this._coloredStudents.filter((student) => !startStudent.includes(student.neptun));
+        let remainingStudents = this._coloredStudents
+            //Filter out the group start students
+            .filter((student) => !startStudent.includes(student.neptun))
+            //Sort them by trueDormitory, so first the trueDorm student will be grouped, and than the fake ones
+            .sort((x, y) => (x.trueDormitory === y.trueDormitory ? 0 : x.trueDormitory ? -1 : 1));
 
         //For each student
         remainingStudents.forEach((student) => {
-            //Get the closest group
+            //Get group with the max amount of students
+            const maxGroup = _.maxBy(groups, (group) => group.length);
+
+            //Get the closest group, witch not contains the most amount of students
             const closestGroup = _.minBy(
                 groups.map((group) => {
                     //Distance to the group is calculated to the groups center
@@ -94,7 +106,7 @@ export class Groups {
                     const dist = Math.sqrt(
                         Math.pow(student.x - groupCenter.x, 2) + Math.pow(student.y - groupCenter.y, 2),
                     );
-                    return { group, dist };
+                    return { group, dist /*:_.isEqual(group, maxGroup) ? Infinity : dist*/ };
                 }),
                 'dist',
             );
@@ -117,6 +129,7 @@ export class Groups {
         });
 
         //Add gray students
+        //TODO: Make gray student group assignment not this random
         let groupId = 0;
         _.shuffle(this._grayStudents).forEach((gray) => {
             if (++groupId >= groups.length) groupId = 0;
@@ -124,19 +137,30 @@ export class Groups {
         });
 
         groups.forEach((group, id) => {
-            const femaleCount = group.filter((student) => student.gender == 'N').length;
+            //Assign group ids to the students
+            group.map((student) => {
+                student.groupId = id;
+                return student;
+            });
 
+            //Make some statistics info
+            const femaleCount = group.filter((student) => student.gender == 'N').length;
             console.log(
                 chalk.cyan('[Info]:'),
                 chalk.yellow(id.toString().padStart(2, ' ')) + '. group: ',
                 `Total: ${chalk.yellow(group.length.toString().padStart(2, ' '))}`,
+                `True Dorm ${chalk.yellow(
+                    group
+                        .filter((s) => s.trueDormitory)
+                        .length.toString()
+                        .padStart(2, ' '),
+                )}`,
                 `Female: ${
                     femaleCount === 1
                         ? chalk.red(femaleCount.toString().padStart(2, ' '))
                         : chalk.yellow(femaleCount.toString().padStart(2, ' '))
                 } `,
                 `Male: ${chalk.yellow((group.length - femaleCount).toString().padStart(2, ' '))} `,
-                `Female precentage: ${chalk.yellow(((femaleCount / group.length) * 100).toFixed(2), '%')}`,
                 femaleCount === 1 ? chalk.red(' <--- ONLY FEMALE HERE!') : '',
             );
         });
@@ -197,7 +221,7 @@ export class Groups {
     }
 
     /**
-     * For a list of student calculates the "center of mass"
+     * For a group of student calculates the "center of mass"
      * @param students Students to calculate for
      * @private
      */

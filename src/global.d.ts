@@ -36,10 +36,17 @@ type Vector = {
 
 /**
  *  @description
- *  Stores the properties of a student
+ *  Stores the properties of a student and other metadata about them
  */
 
-type Student = StudentGTB & StudentDH & StudentDormitory;
+type Student = StudentGTB &
+    StudentDH &
+    StudentDormitory & {
+        //True if this student will actually live in the dorm, or just got a random room for generation
+        trueDormitory: boolean;
+        //To witch group this student is assigned
+        groupId: number;
+    };
 
 /**
  * @description

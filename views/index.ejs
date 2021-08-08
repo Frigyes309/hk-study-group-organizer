@@ -23,7 +23,7 @@
             return {
               label: undefined,
               data: [{x: student.x ? student.x : 0, y: student.y ? student.y : 0}],
-              pointBackgroundColor: student.color,
+              pointBackgroundColor: student.trueDormitory ? student.color : student.color,
               pointRadius: 4,
               pointHoverRadius: 4,
             }
@@ -48,7 +48,7 @@
                 callbacks: {
                   label: function(context) {
                     //return window.data[context.dataIndex];
-                    return [window.data[context.datasetIndex].name, `Room: ${context.parsed.x} - Gtb: ${context.parsed.y.toFixed(2)}`]
+                    return [window.data[context.datasetIndex].name, `Room: ${context.parsed.x} - Gtb: ${context.parsed.y.toFixed(2)}`, `Group id: ${window.data[context.datasetIndex].groupId}`]
                   }
                 }
               }
@@ -57,8 +57,8 @@
               x: {
                 type: 'linear',
                 position: 'bottom',
-                //min: 800,
-                //max: 820,
+                min: 700,
+                max: 720,
               },
               y: {
                 //min: 0,
