@@ -46,7 +46,8 @@ export function importStudents(
             ? huColor.get(studentDorm.color)
             : 'gray';
 
-        //TODO: Filter out IMSC, and German student groups
+        //TODO: Make better filter for IMSC, and German student groups
+        if (student.imsc || student.german) return;
 
         Students.instance.add({
             ...student,

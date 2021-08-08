@@ -64,7 +64,8 @@ export class Groups {
     /**
      * @description Creates study groups
      * 1) Gets every group start student
-     * 2) Goes til no students remains, and for every group puts the closest student to that group
+     * 2) For every student searches the closest group, and puts her/him into that group
+     * 3) Put gray studens (who have no vector value), randomly to the groups
      */
     public createGroups(): StudentVector[][] {
         const startStudent = this.getGroupStartStudents(this._coloredStudents);
@@ -83,38 +84,63 @@ export class Groups {
         });
         let remainingStudents = this._coloredStudents.filter((student) => !startStudent.includes(student.neptun));
 
-        while (remainingStudents.length !== 0) {
-            remainingStudents.forEach((student) => {
-                const closestGroup = _.minBy(
-                    groups.map((group) => {
-                        const groupCenter = this.getGroupCenter(group);
-                        const dist = Math.sqrt(
-                            Math.pow(student.x - groupCenter.x, 2) + Math.pow(student.y - groupCenter.y, 2),
-                        );
-                        return { group, dist };
-                    }),
-                    'dist',
-                );
+        //For each student
+        remainingStudents.forEach((student) => {
+            //Get the closest group
+            const closestGroup = _.minBy(
+                groups.map((group) => {
+                    //Distance to the group is calculated to the groups center
+                    const groupCenter = this.getGroupCenter(group);
+                    const dist = Math.sqrt(
+                        Math.pow(student.x - groupCenter.x, 2) + Math.pow(student.y - groupCenter.y, 2),
+                    );
+                    return { group, dist };
+                }),
+                'dist',
+            );
 
-                if (!closestGroup) {
-                    if (remainingStudents.length !== 0) {
-                        console.log(
-                            chalk.red('[Create Groups]: '),
-                            'Closest group must exist, there are still remaining students',
-                        );
-                    }
-                    return;
-                }
-                closestGroup.group.push(student);
-                remainingStudents = remainingStudents.filter(
-                    (student) => !groups.flat().some((groupS) => groupS!.neptun === student.neptun),
-                );
-                if (remainingStudents.length === 0) {
-                    console.log(chalk.green('[Create Groups]:'), ' No students remaining for grouping');
-                    return;
-                }
-            });
-        }
+            if (!closestGroup) {
+                console.log(chalk.red('[Create Groups]: '), 'Closest group must exist');
+                return;
+            }
+            //Add new student to this closest group
+            closestGroup.group.push(student);
+
+            //Remove this student from the remaining students
+            remainingStudents = remainingStudents.filter(
+                (student) => !groups.flat().some((groupS) => groupS!.neptun === student.neptun),
+            );
+            if (remainingStudents.length === 0) {
+                console.log(chalk.green('[Create Groups]:'), ' No students remaining for grouping, done');
+                return;
+            }
+        });
+
+        //Add gray students
+        let groupId = 0;
+        _.shuffle(this._grayStudents).forEach((gray) => {
+            if (++groupId >= groups.length) groupId = 0;
+            //groups[groupId].push(gray);
+        });
+
+        groups.forEach((group, id) => {
+            const femaleCount = group.filter((student) => student.gender == 'N').length;
+
+            console.log(
+                chalk.cyan('[Info]:'),
+                chalk.yellow(id.toString().padStart(2, ' ')) + '. group: ',
+                `Total: ${chalk.yellow(group.length.toString().padStart(2, ' '))}`,
+                `Female: ${
+                    femaleCount === 1
+                        ? chalk.red(femaleCount.toString().padStart(2, ' '))
+                        : chalk.yellow(femaleCount.toString().padStart(2, ' '))
+                } `,
+                `Male: ${chalk.yellow((group.length - femaleCount).toString().padStart(2, ' '))} `,
+                `Female precentage: ${chalk.yellow(((femaleCount / group.length) * 100).toFixed(2), '%')}`,
+                femaleCount === 1 ? chalk.red(' <--- ONLY FEMALE HERE!') : '',
+            );
+        });
+
         return groups;
     }
 

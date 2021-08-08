@@ -5,7 +5,6 @@ import { Students } from './Students';
 import { importStudents } from './studentsImporter';
 import { Groups } from './createGroups';
 import chalk from 'chalk';
-import { createGroups } from '../dist/createGroups';
 
 const dataDir = '/Users/balint/Documents/GitHub/hk-study-group-organizer/data/';
 const app = express();
@@ -144,6 +143,7 @@ let data = Students.instance.getAll().map((student) => {
 });
 
 const groupCalculator = new Groups(data, 16);
+//Visually distinct colors: https://mokole.com/palette.html
 const colorShowed = [
     '#2f4f4f',
     '#8b4513',
@@ -172,28 +172,23 @@ const groups = groupCalculator.createGroups().map((group, index) => {
 });
 
 groups.forEach((group, id) => {
-    const rooms = Object.keys(_.groupBy(group, 'room'));
+    const rooms = _.groupBy(group, 'room');
     groups.forEach((a, ix) => {
         if (id != ix) {
-            rooms.forEach((room) => {
+            Object.keys(rooms).forEach((room) => {
                 if (Object.keys(_.groupBy(a, 'room')).includes(room) && room !== '0') {
-                    console.log(room);
+                    console.log(
+                        chalk.yellow('[Generation Mistake]: '),
+                        `In group: ${chalk.yellow(id)} and ${chalk.yellow(
+                            ix,
+                        )} are studens who are in the same room: ${chalk.yellow(room)}`,
+                    );
                 }
             });
         }
     });
 });
 
-//console.log(groupStarts);
-/*
-data = data.map((s) => {
-    if (groupStarts.includes(s.neptun)) {
-        s.color = 'violet';
-        //console.log(s);
-    }
-    return s;
-});
-*/
 const port = process.env.PORT || 3000;
 
 app.listen(port, () => {
