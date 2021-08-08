@@ -30,31 +30,33 @@ export class Groups {
         this._coloredStudents = students.filter((s) => s.color !== 'gray');
         this._grayStudents = students.filter((s) => s.color === 'gray');
 
-        console.log(chalk.cyan('[Info]: '), `Colored student count: ${this._coloredStudents.length}`);
+        /*console.log(chalk.cyan('[Info]: '), `Colored student count: ${this._coloredStudents.length}`);
         const colorGroups = _.groupBy(this._coloredStudents, 'color');
         Object.keys(colorGroups).forEach((color) => {
             console.log(chalk.cyan('[Info]: '), `- ${color} student count: ${colorGroups[color].length}`);
         });
         console.log(chalk.cyan('[Info]: '), `Gray student count: ${this._grayStudents.length}`);
         console.log(chalk.cyan('[Info]: '), ` - Female: ${this._grayStudents.filter((s) => s.gender === 'N').length}`);
-        console.log(chalk.cyan('[Info]: '), ` - Male:   ${this._grayStudents.filter((s) => s.gender === 'F').length}`);
+        console.log(chalk.cyan('[Info]: '), ` - Male:   ${this._grayStudents.filter((s) => s.gender === 'F').length}`);*/
 
         this._groupCount = groupCount;
     }
 
     /**
      * @description Creates study groups
-     * 0) Treat students together who are in the same room
-     * 1) First deal with students who actually are in the dorm, than the rest colored, than the grays
-     * 2) Get every group start room
-     * 3) For every group search the closest student room, and put them into that group
+     * - 0) Treat students together who are in the same room
+     * - 1) First deal with students who actually are in the dorm, than the rest colored, than the grays
+     * - 2) Get every group start room
+     * - 3) For every group search the closest student room, and put them into that group
      *       - Disallow to put student rooms in group, if they are in an other floor in the dorm (distance is to high)
      *       - Disallow to put two girl rooms in the same study groups
      *       - Do this until we allowed to put students in any of the groups
-     * 4) For rest of the students searches the closest group, and put them into that group
+     * - 4) For rest of the students searches the closest group, and put them into that group
      *       - Note: here only will be students if there are more girl rooms in any floor, than groups on that floor
      *       - TODO: Also implement this 4th step
-     * 5) Put gray students (who have no vector value), randomly to the groups
+     * - 5) Put gray students (who have no vector value), in groups
+     *       - First fill the females, always put her to the group with the least females
+     *       - Than with males make the group counts even
      */
     public createGroups(): StudentVector[][] {
         const startStudent = this.getGroupStartRooms(this._coloredStudents.filter((student) => student.trueDormitory));
@@ -117,12 +119,10 @@ export class Groups {
                 if (this.getGroupFloor(group) !== Math.floor(room[0].room / 100) * 100) {
                     //Can't add them because they are in a different floor
                     inadequateGroupCount++;
-                    debugger;
                     //return;
                 } else if (this.isFemaleRoom(room) && this.groupHasFemaleRoom(group)) {
                     //Can't add them because this study group already has a female room
                     inadequateGroupCount++;
-                    debugger;
                     //return;
                 } else {
                     inadequateGroupCount = 0;
@@ -134,14 +134,14 @@ export class Groups {
                     (student) => !groups.flat().some((groupS) => groupS!.neptun === student.neptun),
                 );
                 if (remainingStudents.length === 0) {
-                    console.log(chalk.green('[Create Groups]:'), ' Successfully grouped dormitory students');
+                    //console.log(chalk.green('[Create Groups]:'), ' Successfully grouped dormitory students');
                     //Make a new batch of remaining students from students who are fakeDorm students
                     //Basically all remaining colored students
                     remainingStudents = this._coloredStudents.filter(
                         (student) => !groups.flat().some((groupS) => groupS!.neptun === student.neptun),
                     );
                     if (remainingStudents.length === 0) {
-                        console.log(chalk.green('[Create Groups]:'), ' Successfully grouped non dormitory students');
+                        //console.log(chalk.green('[Create Groups]:'), ' Successfully grouped non dormitory students');
                         //No students remaining exit the loop
                         inadequateGroupCount = Infinity;
                         return;
@@ -184,41 +184,12 @@ export class Groups {
             smallestGroup.push(newStudent);
         }
 
-        //Add gray students
-        //TODO: Make gray student group assignment not this random
-        let groupId = 0;
-        _.shuffle(this._grayStudents).forEach((gray) => {
-            if (++groupId >= groups.length) groupId = 0;
-            groups[groupId].push(gray);
-        });
-
         groups.forEach((group, id) => {
             //Assign group ids to the students
             group.map((student) => {
                 student.groupId = id;
                 return student;
             });
-
-            //Make some statistics info
-            const femaleCount = group.filter((student) => student.gender == 'N').length;
-            console.log(
-                chalk.cyan('[Info]:'),
-                chalk.yellow(id.toString().padStart(2, ' ')) + '. group: ',
-                `Total: ${chalk.yellow(group.length.toString().padStart(2, ' '))}`,
-                `True Dorm ${chalk.yellow(
-                    group
-                        .filter((s) => s.trueDormitory)
-                        .length.toString()
-                        .padStart(2, ' '),
-                )}`,
-                `Female: ${
-                    femaleCount === 1
-                        ? chalk.red(femaleCount.toString().padStart(2, ' '))
-                        : chalk.yellow(femaleCount.toString().padStart(2, ' '))
-                } `,
-                `Male: ${chalk.yellow((group.length - femaleCount).toString().padStart(2, ' '))} `,
-                femaleCount === 1 ? chalk.red(' <--- ONLY FEMALE HERE!') : '',
-            );
         });
 
         return groups;
@@ -321,7 +292,6 @@ export class Groups {
         const rooms = Object.keys(_.groupBy(students, (student) => Math.floor(student.room / 100) * 100));
         if (rooms.length !== 1) {
             console.log(chalk.red('[Group Floor]:'), ' There are multiple floor students in this group');
-            debugger;
             return NaN;
         }
         return Number(rooms[0]);

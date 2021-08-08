@@ -18,6 +18,8 @@
       fetch('/api/data').then(response => response.json()).then(data => {
         window.data = data;
 
+        debugger;
+
         const chartData = {
           datasets: data.map(student => {
             return {
@@ -57,8 +59,8 @@
               x: {
                 type: 'linear',
                 position: 'bottom',
-                min: 1000,
-                max: 1020,
+                min: 600,
+                max: 620,
               },
               y: {
                 //min: 0,
