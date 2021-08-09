@@ -8,7 +8,22 @@ import chalk from 'chalk';
  */
 
 export function scoreGroups(groups: StudentVector[][]): number {
+    let inSameRoomButNotGroup = 0;
+    groups.forEach((group, id) => {
+        const rooms = _.groupBy(group, 'room');
+        groups.forEach((a, ix) => {
+            if (id != ix) {
+                Object.keys(rooms).forEach((room) => {
+                    if (Object.keys(_.groupBy(a, 'room')).includes(room) && room !== '0') {
+                        inSameRoomButNotGroup++;
+                    }
+                });
+            }
+        });
+    });
+
     return (
+        inSameRoomButNotGroup +
         standardDeviation(groups.map((group) => group.filter((s) => s.trueDormitory).length)) +
         standardDeviation(groups.map((group) => group.filter((s) => s.gender === 'N').length))
     );
@@ -38,7 +53,8 @@ export function printGroupStats(groups: StudentVector[][]) {
                         : chalk.yellow(femaleCount.toString().padStart(2, ' '))
                 } ` +
                 `Male: ${chalk.yellow((group.length - femaleCount).toString().padStart(2, ' '))} ` +
-                `Total: ${chalk.yellow(group.length.toString().padStart(2, ' '))}` +
+                `Total: ${chalk.yellow(group.length.toString().padStart(2, ' '))} ` +
+                `Color: ${chalk.yellow(group[0].color).toString().padStart(4, ' ')}` +
                 (femaleCount === 1 ? chalk.red(' <--- ONLY FEMALE HERE!') : ''),
         );
     });

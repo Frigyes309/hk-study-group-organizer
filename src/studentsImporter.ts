@@ -5,12 +5,16 @@ import { Students } from './Students';
  * @description Imports a group [Vill, Infó, Üzinfó] of students
  * @param filePaths Object containing the excel file paths [DH, Dormitory, GTB]
  * @param major Which major to import [Vill, Infó, Üzinfó]
+ * @param imsc If true we will import IMSC students
+ * @param german If true we will import German students
  */
 export function importStudents(
     filePaths: { DH: string; Dorm: string; GTB: string },
     major: 'Vill' | 'Infó' | 'Üzinfó',
+    imsc: boolean = false,
+    german: boolean = false,
 ) {
-    //TODO: Before import new data clear the Students class container
+    Students.instance.clear();
 
     const infoDH = importDH(filePaths.DH, major); //TODO: This major -> excel sheet mapping may needs to be changed
     if (!infoDH) {
@@ -46,11 +50,12 @@ export function importStudents(
             ? huColor.get(studentDorm.color)
             : 'gray';
 
-        //TODO: Make better filter for IMSC, and German student groups
-        if (student.imsc || student.german) return;
-
-        //TODO: Make better double passive student filter
+        //If a student is doublePassive we don't care about her/him, will be grouped next year
         if (student.doublePassive) return;
+
+        //TODO: Make better filter for IMSC, and German student groups
+        if (imsc && !student.imsc) return;
+        if (german && !student.german) return;
 
         Students.instance.add({
             ...student,

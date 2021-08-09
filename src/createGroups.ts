@@ -46,7 +46,7 @@ export class Groups {
      * @description Creates study groups
      * - 0) Treat students together who are in the same room
      * - 1) First deal with students who actually are in the dorm, than the rest colored, than the grays
-     * - 2) Get every group start room
+     * - 2) Get every group start student and her/his room
      * - 3) For every group search the closest student room, and put them into that group
      *       - Disallow to put student rooms in group, if they are in an other floor in the dorm (distance is to high)
      *       - Disallow to put two girl rooms in the same study groups
@@ -57,9 +57,12 @@ export class Groups {
      * - 5) Put gray students (who have no vector value), in groups
      *       - First fill the females, always put her to the group with the least females
      *       - Than with males make the group counts even
+     * @returns StudentVector[][] Student groups created
      */
     public createGroups(): StudentVector[][] {
-        const startStudent = this.getGroupStartRooms(this._coloredStudents.filter((student) => student.trueDormitory));
+        const startStudent = this.getGroupStartStudents(
+            this._coloredStudents.filter((student) => student.trueDormitory),
+        );
         if (!startStudent) {
             console.log(chalk.red('[Create Groups]: '), 'Group start students are empty');
             return [];
@@ -196,11 +199,36 @@ export class Groups {
     }
 
     /**
+     * @description Randomly creates student groups, this is useful for small batches of students, like
+     * IMSC, Deutch and Bprof
+     */
+    public createBasicGroups(): StudentVector[][] {
+        let groups = Array<StudentVector[]>();
+        for (let i = 0; i < this._groupCount; i++) {
+            groups.push([]);
+        }
+
+        let groupId = 0;
+        _.shuffle(this._coloredStudents).forEach((student) => {
+            if (groupId >= this._groupCount) groupId = 0;
+            groups[groupId].push(student);
+            groupId++;
+        });
+        _.shuffle(this._grayStudents).forEach((student) => {
+            if (groupId >= this._groupCount) groupId = 0;
+            groups[groupId].push(student);
+            groupId++;
+        });
+
+        return groups;
+    }
+
+    /**
      * @description Get groupCount many students, who are the furthest away.
      * They will be the starting point of each group
      * //TODO: Document algorithm
      */
-    private getGroupStartRooms(students: StudentVector[]): string[] {
+    private getGroupStartStudents(students: StudentVector[]): string[] {
         if (students.length < this._groupCount) {
             console.log(
                 chalk.red('[Create Groups]: '),

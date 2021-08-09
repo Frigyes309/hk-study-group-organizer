@@ -24,16 +24,20 @@ importStudents(
         GTB: path.join(dataDir, 'GTB-2020-tankörbeosztáshoz.xlsx'),
     },
     'Infó',
+    true,
+    false,
 );
 
 console.log(chalk.green('[General]: '), `Data imported, student count: ${Students.instance.getAll().length}`);
+
+debugger;
 
 let bestGroups = Array<StudentVector[]>();
 let bestScore = Infinity; //Lower is better
 
 //From 100 generation get the best groups
 for (let i = 0; i <= 100; i++) {
-    const groupCalculator = new Groups(createVectors(Students.instance.getAll()), 16);
+    const groupCalculator = new Groups(createVectors(Students.instance.getAll()), 3);
     let groups = groupCalculator.createGroups();
     const score = scoreGroups(groups);
     if (score < bestScore) {

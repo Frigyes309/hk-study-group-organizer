@@ -31,6 +31,13 @@ export class Students {
     }
 
     /**
+     * @description Clears the students array
+     */
+    public clear() {
+        this._students = Array<Student>();
+    }
+
+    /**
      * @description Adds a student to the mapping
      * @param student Student to add to the list
      */
