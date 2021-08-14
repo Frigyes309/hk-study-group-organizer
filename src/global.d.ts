@@ -55,6 +55,24 @@ type Student = StudentGTB &
 type StudentVector = Student & Vector;
 
 /**
+ * @description Options for the vector generation algo
+ */
+type VectorOptions = {
+    gtbScale: number; //Scale for the gtb vector dimension
+};
+
+type Major = 'Vill' | 'Infó' | 'Üzinfó';
+
+type GenerationType = {
+    name: string; //Name of this batch, only for display purposes
+    major: Major; //Major for the inport
+    imsc: boolean;
+    german: boolean;
+    groupCount: number; //How many groups to create
+    basicGroup: boolean; //Generate this batch with the basicGroup function, or the regular
+};
+
+/**
  * @description
  * Each student has a group witch defines the color of a student
  */

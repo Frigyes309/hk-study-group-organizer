@@ -101,7 +101,6 @@ export class Students {
             // @ts-ignore
             GtbGroups[key] = _.groupBy(GtbGroups[key], 'roomSenior');
         });
-        console.log();
         return _.toPlainObject(GtbGroups);
     }
 }

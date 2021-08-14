@@ -10,7 +10,7 @@ import { Students } from './Students';
  */
 export function importStudents(
     filePaths: { DH: string; Dorm: string; GTB: string },
-    major: 'Vill' | 'Infó' | 'Üzinfó',
+    major: Major,
     imsc: boolean = false,
     german: boolean = false,
 ) {

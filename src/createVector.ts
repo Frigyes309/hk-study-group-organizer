@@ -7,7 +7,7 @@ import { Students } from './Students';
  * @param students students array to convert
  * @returns StudentVector[] students converted to vector values
  */
-export function createVectors(students: Student[]): StudentVector[] {
+export function createVectors(students: Student[], options: VectorOptions): StudentVector[] {
     /**
      * Create ids for card and room seniors
      */
@@ -118,7 +118,7 @@ export function createVectors(students: Student[]): StudentVector[] {
         return {
             ...student,
             x: room,
-            y: Number(gtb) * 0.01,
+            y: Number(gtb) * options.gtbScale,
         };
     });
 }

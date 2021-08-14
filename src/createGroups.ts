@@ -121,10 +121,12 @@ export class Groups {
 
                 if (this.getGroupFloor(group) !== Math.floor(room[0].room / 100) * 100) {
                     //Can't add them because they are in a different floor
+                    debugger;
                     inadequateGroupCount++;
                     //return;
                 } else if (this.isFemaleRoom(room) && this.groupHasFemaleRoom(group)) {
                     //Can't add them because this study group already has a female room
+                    debugger;
                     inadequateGroupCount++;
                     //return;
                 } else {
@@ -137,14 +139,14 @@ export class Groups {
                     (student) => !groups.flat().some((groupS) => groupS!.neptun === student.neptun),
                 );
                 if (remainingStudents.length === 0) {
-                    //console.log(chalk.green('[Create Groups]:'), ' Successfully grouped dormitory students');
+                    console.log(chalk.green('[Create Groups]:'), ' Successfully grouped dormitory students');
                     //Make a new batch of remaining students from students who are fakeDorm students
                     //Basically all remaining colored students
                     remainingStudents = this._coloredStudents.filter(
                         (student) => !groups.flat().some((groupS) => groupS!.neptun === student.neptun),
                     );
                     if (remainingStudents.length === 0) {
-                        //console.log(chalk.green('[Create Groups]:'), ' Successfully grouped non dormitory students');
+                        console.log(chalk.green('[Create Groups]:'), ' Successfully grouped non dormitory students');
                         //No students remaining exit the loop
                         inadequateGroupCount = Infinity;
                         return;
@@ -152,6 +154,8 @@ export class Groups {
                 }
             });
         }
+
+        debugger;
 
         //Distribute gray females equally in the study groups
         let grayFemales = this._grayStudents.filter((s) => s.gender === 'N');
