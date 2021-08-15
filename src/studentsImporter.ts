@@ -53,9 +53,11 @@ export function importStudents(
         //If a student is doublePassive we don't care about her/him, will be grouped next year
         if (student.doublePassive) return;
 
-        //TODO: Make better filter for IMSC, and German student groups
-        if (imsc && !student.imsc) return;
-        if (german && !student.german) return;
+        if (imsc) {
+            if (!student.imsc) return;
+        } else if (german) {
+            if (!student.german) return;
+        } else if (student.imsc || student.german) return;
 
         Students.instance.add({
             ...student,

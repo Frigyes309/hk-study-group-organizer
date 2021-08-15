@@ -119,7 +119,6 @@ export class Groups {
                 //Get her/his roommates
                 const room = remainingStudents.filter((student) => student.room === closestStudent.student.room);
 
-                //TODO: Calculate with inadequateGroupCount
                 if (config.calculateWithInadequateGroupCount) {
                     if (this.getGroupFloor(group) !== Math.floor(room[0].room / 100) * 100) {
                         //Can't add them because they are in a different floor
@@ -134,6 +133,8 @@ export class Groups {
                         group.push(...room);
                     }
                 } else {
+                    //TODO: Also when this false, try to get the best color segregation in the groups,
+                    //TODO: now only randomness makes this condition true
                     group.push(...room);
                 }
 

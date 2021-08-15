@@ -8,6 +8,7 @@ import { importStudents } from './studentsImporter';
 import { Groups } from './createGroups';
 import { createVectors, getFloorColors } from './createVector';
 import { printGroupStats, scoreGroups } from './scoreGroups';
+import { exportGroups } from './exportGroups';
 
 const app = express();
 // sets ejs views folder
@@ -17,7 +18,7 @@ app.set('view engine', 'ejs');
 
 const CONFIG = {
     inputDir: '/Users/balint/Documents/GitHub/hk-study-group-organizer/data/',
-    outputDir: '',
+    outputDir: '/Users/balint/Documents/GitHub/hk-study-group-organizer/data/output',
     groupGenerationCount: 100, //How many times try to generate a group combination witch will give us the best score
     gtbScale: 0.01, //Scale for the gtb vector dimension
 };
@@ -77,6 +78,7 @@ const generationTypes: GenerationType[] = [
         basicGroup: true,
         calculateWithInadequateGroupCount: true,
     },
+    //TODO: Bprof generation still fails, probably because only 2 dorm students exist
     {
         name: 'Bprof General',
         major: 'Üzinfó',
@@ -158,6 +160,8 @@ generationTypes.forEach((generationType) => {
     progressBar.stop();
 
     printGroupStats(bestGroups);
+
+    exportGroups(CONFIG.outputDir, generationType.name, bestGroups);
 });
 
 //Visually distinct colors: https://mokole.com/palette.html
