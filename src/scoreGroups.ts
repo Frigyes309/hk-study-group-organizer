@@ -54,9 +54,12 @@ export function printGroupStats(groups: StudentVector[][]) {
                 } ` +
                 `Male: ${chalk.yellow((group.length - femaleCount).toString().padStart(2, ' '))} ` +
                 `Total: ${chalk.yellow(group.length.toString().padStart(2, ' '))} ` +
-                `Color: ${chalk.yellow(group[0].color).toString().padStart(4, ' ')}` +
+                `Color: ${chalk
+                    .yellow(Object.keys(_.groupBy(group, 'color')).join(', '))
+                    .toString()
+                    .padStart(4, ' ')}` +
                 (femaleCount === 1 ? chalk.red(' <--- ONLY FEMALE HERE!') : ''),
         );
     });
-    console.log(`Total student count: ${chalk.yellow(groups.flat().length)}`);
+    console.log(chalk.cyan('[Info]:') + ` Total student count: ${chalk.yellow(groups.flat().length)}`);
 }

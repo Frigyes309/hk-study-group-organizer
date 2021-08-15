@@ -59,6 +59,8 @@ type StudentVector = Student & Vector;
  */
 type VectorOptions = {
     gtbScale: number; //Scale for the gtb vector dimension
+    //If we have a color-floor mapping from the last generataion we can use that one
+    masterColors?: { color: string; floor: number; cards: string[] }[];
 };
 
 type Major = 'Vill' | 'Infó' | 'Üzinfó';
@@ -70,6 +72,8 @@ type GenerationType = {
     german: boolean;
     groupCount: number; //How many groups to create
     basicGroup: boolean; //Generate this batch with the basicGroup function, or the regular
+    //If true, in the createGroups function we will exit early if a room is not suitable for any of the groups
+    calculateWithInadequateGroupCount: boolean;
 };
 
 /**

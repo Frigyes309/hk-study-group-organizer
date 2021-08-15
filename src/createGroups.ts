@@ -59,7 +59,7 @@ export class Groups {
      *       - Than with males make the group counts even
      * @returns StudentVector[][] Student groups created
      */
-    public createGroups(): StudentVector[][] {
+    public createGroups(config: { calculateWithInadequateGroupCount: boolean }): StudentVector[][] {
         const startStudent = this.getGroupStartStudents(
             this._coloredStudents.filter((student) => student.trueDormitory),
         );
@@ -119,18 +119,21 @@ export class Groups {
                 //Get her/his roommates
                 const room = remainingStudents.filter((student) => student.room === closestStudent.student.room);
 
-                if (this.getGroupFloor(group) !== Math.floor(room[0].room / 100) * 100) {
-                    //Can't add them because they are in a different floor
-                    debugger;
-                    inadequateGroupCount++;
-                    //return;
-                } else if (this.isFemaleRoom(room) && this.groupHasFemaleRoom(group)) {
-                    //Can't add them because this study group already has a female room
-                    debugger;
-                    inadequateGroupCount++;
-                    //return;
+                //TODO: Calculate with inadequateGroupCount
+                if (config.calculateWithInadequateGroupCount) {
+                    if (this.getGroupFloor(group) !== Math.floor(room[0].room / 100) * 100) {
+                        //Can't add them because they are in a different floor
+                        inadequateGroupCount++;
+                        //return;
+                    } else if (this.isFemaleRoom(room) && this.groupHasFemaleRoom(group)) {
+                        //Can't add them because this study group already has a female room
+                        inadequateGroupCount++;
+                        //return;
+                    } else {
+                        inadequateGroupCount = 0;
+                        group.push(...room);
+                    }
                 } else {
-                    inadequateGroupCount = 0;
                     group.push(...room);
                 }
 
@@ -139,14 +142,14 @@ export class Groups {
                     (student) => !groups.flat().some((groupS) => groupS!.neptun === student.neptun),
                 );
                 if (remainingStudents.length === 0) {
-                    console.log(chalk.green('[Create Groups]:'), ' Successfully grouped dormitory students');
+                    //console.log(chalk.green('[Create Groups]:'), ' Successfully grouped dormitory students');
                     //Make a new batch of remaining students from students who are fakeDorm students
                     //Basically all remaining colored students
                     remainingStudents = this._coloredStudents.filter(
                         (student) => !groups.flat().some((groupS) => groupS!.neptun === student.neptun),
                     );
                     if (remainingStudents.length === 0) {
-                        console.log(chalk.green('[Create Groups]:'), ' Successfully grouped non dormitory students');
+                        //console.log(chalk.green('[Create Groups]:'), ' Successfully grouped non dormitory students');
                         //No students remaining exit the loop
                         inadequateGroupCount = Infinity;
                         return;
@@ -154,8 +157,6 @@ export class Groups {
                 }
             });
         }
-
-        debugger;
 
         //Distribute gray females equally in the study groups
         let grayFemales = this._grayStudents.filter((s) => s.gender === 'N');

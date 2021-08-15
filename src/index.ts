@@ -6,7 +6,7 @@ import { Bar, Presets } from 'cli-progress';
 import { Students } from './Students';
 import { importStudents } from './studentsImporter';
 import { Groups } from './createGroups';
-import { createVectors } from './createVector';
+import { createVectors, getFloorColors } from './createVector';
 import { printGroupStats, scoreGroups } from './scoreGroups';
 
 const app = express();
@@ -18,23 +18,91 @@ app.set('view engine', 'ejs');
 const CONFIG = {
     inputDir: '/Users/balint/Documents/GitHub/hk-study-group-organizer/data/',
     outputDir: '',
-    groupGenerationCount: 1, //How many times try to generate a group combination witch will give us the best score
+    groupGenerationCount: 100, //How many times try to generate a group combination witch will give us the best score
     gtbScale: 0.01, //Scale for the gtb vector dimension
 };
 
 const generationTypes: GenerationType[] = [
-    //{ name: 'Info General', major: 'Infó', imsc: false, german: false, groupCount: 18, basicGroup: false },
-    { name: 'Info IMSC', major: 'Infó', imsc: true, german: false, groupCount: 3, basicGroup: false },
-    //{ name: 'Info German', major: 'Infó', imsc: false, german: true, groupCount: 1, basicGroup: true },
-    //{ name: 'Vill General', major: 'Vill', imsc: false, german: false, groupCount: 10, basicGroup: false },
-    //{ name: 'Vill IMSC', major: 'Vill', imsc: true, german: false, groupCount: 3, basicGroup: false },
-    //{ name: 'Vill German', major: 'Vill', imsc: false, german: true, groupCount: 1, basicGroup: true },
-    //{ name: 'Bprof General', major: 'Üzinfó', imsc: false, german: false, groupCount: 5, basicGroup: false },
+    {
+        name: 'Info General',
+        major: 'Infó',
+        imsc: false,
+        german: false,
+        groupCount: 18,
+        basicGroup: false,
+        calculateWithInadequateGroupCount: true,
+    },
+    {
+        name: 'Info IMSC',
+        major: 'Infó',
+        imsc: true,
+        german: false,
+        groupCount: 3,
+        basicGroup: false,
+        calculateWithInadequateGroupCount: false,
+    },
+    {
+        name: 'Info German',
+        major: 'Infó',
+        imsc: false,
+        german: true,
+        groupCount: 1,
+        basicGroup: true,
+        calculateWithInadequateGroupCount: true,
+    },
+    {
+        name: 'Vill General',
+        major: 'Vill',
+        imsc: false,
+        german: false,
+        groupCount: 10,
+        basicGroup: false,
+        calculateWithInadequateGroupCount: true,
+    },
+    {
+        name: 'Vill IMSC',
+        major: 'Vill',
+        imsc: true,
+        german: false,
+        groupCount: 1,
+        basicGroup: true,
+        calculateWithInadequateGroupCount: true,
+    },
+    {
+        name: 'Vill German',
+        major: 'Vill',
+        imsc: false,
+        german: true,
+        groupCount: 1,
+        basicGroup: true,
+        calculateWithInadequateGroupCount: true,
+    },
+    {
+        name: 'Bprof General',
+        major: 'Üzinfó',
+        imsc: false,
+        german: false,
+        groupCount: 5,
+        basicGroup: true,
+        calculateWithInadequateGroupCount: true,
+    },
 ];
 
 console.log(chalk.green('[General]: '), 'Program started');
 
+importStudents(
+    {
+        DH: path.join(CONFIG.inputDir, 'VIK-alapképzés-felvettek-2020A-besoroláshoz.xlsx'),
+        Dorm: path.join(CONFIG.inputDir, 'Bsc-felvettek.xlsx'),
+        GTB: path.join(CONFIG.inputDir, 'GTB-2020-tankörbeosztáshoz.xlsx'),
+    },
+    'Infó',
+);
+const masterFloorColors = getFloorColors();
+
 generationTypes.forEach((generationType) => {
+    console.log();
+    console.log(chalk.cyan(`--------- [${generationType.name}] ---------`));
     importStudents(
         {
             DH: path.join(CONFIG.inputDir, 'VIK-alapképzés-felvettek-2020A-besoroláshoz.xlsx'),
@@ -57,7 +125,7 @@ generationTypes.forEach((generationType) => {
     let progressBar = new Bar(
         {
             noTTYOutput: true,
-            format: `[${chalk.cyan('{name}')}]: [{bar}] ${chalk.yellow(
+            format: `${chalk.magenta('[{name}]')}: [{bar}] ${chalk.yellow(
                 '{percentage}',
             )}% | ETA: {eta}s | Current/Best Score: {bestCurrent}`,
         },
@@ -68,10 +136,14 @@ generationTypes.forEach((generationType) => {
     //From n generation get the best groups
     for (let i = 0; i < CONFIG.groupGenerationCount; i++) {
         const groupCalculator = new Groups(
-            createVectors(Students.instance.getAll(), { gtbScale: CONFIG.gtbScale }),
+            createVectors(Students.instance.getAll(), { gtbScale: CONFIG.gtbScale, masterColors: masterFloorColors }),
             generationType.groupCount,
         );
-        let groups = generationType.basicGroup ? groupCalculator.createBasicGroups() : groupCalculator.createGroups();
+        let groups = generationType.basicGroup
+            ? groupCalculator.createBasicGroups()
+            : groupCalculator.createGroups({
+                  calculateWithInadequateGroupCount: generationType.calculateWithInadequateGroupCount,
+              });
         const score = scoreGroups(groups);
         if (score < bestScore) {
             bestGroups = groups;

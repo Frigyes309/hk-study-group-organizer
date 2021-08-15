@@ -3,24 +3,9 @@ import chalk from 'chalk';
 import { Students } from './Students';
 
 /**
- * @description Convert students to vectors
- * @param students students array to convert
- * @returns StudentVector[] students converted to vector values
+ * @description Gets the floor - color mapping for each floor/color
  */
-export function createVectors(students: Student[], options: VectorOptions): StudentVector[] {
-    /**
-     * Create ids for card and room seniors
-     */
-    const gtbSeniorGroups = Students.instance.getGtbSeniorGroups();
-    let cardSeniorIds = new Map<string, number>();
-    let roomSeniorIds = new Map<string, number>();
-    Object.keys(gtbSeniorGroups).forEach((card, index) => {
-        cardSeniorIds.set(card, index + 1);
-        Object.keys(gtbSeniorGroups[card]).forEach((room, index) => {
-            roomSeniorIds.set(room, (index + 1) * 3);
-        });
-    });
-
+export function getFloorColors(): { color: string; floor: number; cards: string[] }[] {
     /**
      * Get most common color from each floor of the Dormitory
      */
@@ -58,10 +43,33 @@ export function createVectors(students: Student[], options: VectorOptions): Stud
         } else {
             console.error(
                 chalk.red('[GTB Card Colors]: '),
-                `No matching GTB ${color}, and Dormitory ${colors.join()} colors found`,
+                `No matching GTB ${color}, and Dormitory ${colors.map((c) => c.color).join()} colors found`,
             );
         }
     });
+    return colors;
+}
+
+/**
+ * @description Convert students to vectors
+ * @param students students array to convert
+ * @returns StudentVector[] students converted to vector values
+ */
+export function createVectors(students: Student[], options: VectorOptions): StudentVector[] {
+    /**
+     * Create ids for card and room seniors
+     */
+    const gtbSeniorGroups = Students.instance.getGtbSeniorGroups();
+    let cardSeniorIds = new Map<string, number>();
+    let roomSeniorIds = new Map<string, number>();
+    Object.keys(gtbSeniorGroups).forEach((card, index) => {
+        cardSeniorIds.set(card, index + 1);
+        Object.keys(gtbSeniorGroups[card]).forEach((room, index) => {
+            roomSeniorIds.set(room, (index + 1) * 3);
+        });
+    });
+
+    const colors = options.masterColors ? options.masterColors : getFloorColors();
 
     /**
      * Get possible room numbers form the Dormitory
@@ -95,7 +103,9 @@ export function createVectors(students: Student[], options: VectorOptions): Stud
             if (color) {
                 let card = _.sample(color.cards);
                 if (card) {
-                    gtb = String(cardSeniorIds.get(card)) + (_.random(1, 3) * 3).toString();
+                    gtb =
+                        String(color.cards.map((card) => cardSeniorIds.get(card)).filter((a) => !!a)[0]) +
+                        (_.random(1, 3) * 3).toString();
                 } else {
                     console.log(chalk.red('[Vector Creation]: '), 'No card seniors found for this color');
                 }
