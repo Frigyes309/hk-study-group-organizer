@@ -36,30 +36,58 @@ function standardDeviation(array: number[]): number {
 
 export function printGroupStats(groups: StudentVector[][]) {
     groups.forEach((group, id) => {
-        const femaleCount = group.filter((student) => student.gender == 'N').length;
+        let stats = getGroupStats(group);
         console.log(
             chalk.cyan('[Info]:') +
                 chalk.yellow(id.toString().padStart(3, ' ')) +
                 '. group => ' +
-                `Dormitory: ${chalk.yellow(
-                    group
-                        .filter((s) => s.trueDormitory)
-                        .length.toString()
-                        .padStart(2, ' '),
-                )} ` +
+                `Dormitory: ${chalk.yellow(stats.dormitoryCount.toString().padStart(2, ' '))} ` +
                 `Female: ${
-                    femaleCount === 1
-                        ? chalk.red(femaleCount.toString().padStart(2, ' '))
-                        : chalk.yellow(femaleCount.toString().padStart(2, ' '))
+                    stats.femaleCount === 1
+                        ? chalk.red(stats.femaleCount.toString().padStart(2, ' '))
+                        : chalk.yellow(stats.femaleCount.toString().padStart(2, ' '))
                 } ` +
-                `Male: ${chalk.yellow((group.length - femaleCount).toString().padStart(2, ' '))} ` +
-                `Total: ${chalk.yellow(group.length.toString().padStart(2, ' '))} ` +
+                `Male: ${chalk.yellow(stats.maleCount.toString().padStart(2, ' '))} ` +
+                `Total: ${chalk.yellow(stats.totalCount.toString().padStart(2, ' '))} ` +
                 `Color: ${chalk
-                    .yellow(Object.keys(_.groupBy(group, 'color')).join(', '))
+                    .yellow(stats.colors.map((c) => c.color).join(', '))
                     .toString()
                     .padStart(4, ' ')}` +
-                (femaleCount === 1 ? chalk.red(' <--- ONLY FEMALE HERE!') : ''),
+                (stats.femaleCount === 1 ? chalk.red(' <--- ONLY FEMALE HERE!') : ''),
         );
     });
     console.log(chalk.cyan('[Info]:') + ` Total student count: ${chalk.yellow(groups.flat().length)}`);
+}
+
+export function getGroupsStats(groups: StudentVector[][]) {
+    return groups.map((group, id) => {
+        return { id: id, stats: getGroupStats(group) };
+    });
+}
+
+type groupStat = {
+    totalCount: number;
+    dormitoryCount: number;
+    femaleCount: number;
+    maleCount: number;
+    colors: { color: string; count: number }[]; //All available colors, and it's counts
+    countryRatio: number; //Percentage of non BudaPest students in this group
+};
+
+/**
+ * @description Given a group this function generates various metrics about the group
+ * @param group The group, on witch we calculate the stats
+ */
+function getGroupStats(group: StudentVector[]): groupStat {
+    const colorGroups = _.groupBy(group, 'color');
+    return {
+        totalCount: group.length,
+        femaleCount: group.filter((s) => s.gender === 'N').length,
+        maleCount: group.filter((s) => s.gender === 'F').length,
+        dormitoryCount: group.filter((s) => s.trueDormitory).length,
+        colors: Object.keys(colorGroups).map((a) => {
+            return { color: a, count: colorGroups[a].length };
+        }),
+        countryRatio: (group.filter((s) => s.zipCode >= 1000 && s.zipCode <= 1999).length / group.length) * 100,
+    };
 }

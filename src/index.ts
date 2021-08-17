@@ -8,7 +8,7 @@ import { importStudents } from './studentsImporter';
 import { Groups } from './createGroups';
 import { createVectors, getFloorColors } from './createVector';
 import { printGroupStats, scoreGroups } from './scoreGroups';
-import { exportGroups } from './exportGroups';
+import { exportGroups, exportStats } from './export';
 
 const app = express();
 // sets ejs views folder
@@ -30,8 +30,7 @@ const generationTypes: GenerationType[] = [
         imsc: false,
         german: false,
         groupCount: 18,
-        basicGroup: false,
-        calculateWithInadequateGroupCount: true,
+        allowMultipleGirlRooms: false,
     },
     {
         name: 'Info IMSC',
@@ -39,8 +38,7 @@ const generationTypes: GenerationType[] = [
         imsc: true,
         german: false,
         groupCount: 3,
-        basicGroup: false,
-        calculateWithInadequateGroupCount: false,
+        allowMultipleGirlRooms: true,
     },
     {
         name: 'Info German',
@@ -48,8 +46,7 @@ const generationTypes: GenerationType[] = [
         imsc: false,
         german: true,
         groupCount: 1,
-        basicGroup: true,
-        calculateWithInadequateGroupCount: true,
+        allowMultipleGirlRooms: false,
     },
     {
         name: 'Vill General',
@@ -57,8 +54,7 @@ const generationTypes: GenerationType[] = [
         imsc: false,
         german: false,
         groupCount: 10,
-        basicGroup: false,
-        calculateWithInadequateGroupCount: true,
+        allowMultipleGirlRooms: false,
     },
     {
         name: 'Vill IMSC',
@@ -66,8 +62,7 @@ const generationTypes: GenerationType[] = [
         imsc: true,
         german: false,
         groupCount: 1,
-        basicGroup: true,
-        calculateWithInadequateGroupCount: true,
+        allowMultipleGirlRooms: false,
     },
     {
         name: 'Vill German',
@@ -75,18 +70,15 @@ const generationTypes: GenerationType[] = [
         imsc: false,
         german: true,
         groupCount: 1,
-        basicGroup: true,
-        calculateWithInadequateGroupCount: true,
+        allowMultipleGirlRooms: false,
     },
-    //TODO: Bprof generation still fails, probably because only 2 dorm students exist
     {
         name: 'Bprof General',
         major: 'Üzinfó',
         imsc: false,
         german: false,
         groupCount: 5,
-        basicGroup: true,
-        calculateWithInadequateGroupCount: true,
+        allowMultipleGirlRooms: true,
     },
 ];
 
@@ -102,7 +94,7 @@ importStudents(
 );
 const masterFloorColors = getFloorColors();
 
-generationTypes.forEach((generationType) => {
+const result: GenerationResult[] = generationTypes.map((generationType) => {
     console.log();
     console.log(chalk.cyan(`--------- [${generationType.name}] ---------`));
     importStudents(
@@ -141,11 +133,10 @@ generationTypes.forEach((generationType) => {
             createVectors(Students.instance.getAll(), { gtbScale: CONFIG.gtbScale, masterColors: masterFloorColors }),
             generationType.groupCount,
         );
-        let groups = generationType.basicGroup
-            ? groupCalculator.createBasicGroups()
-            : groupCalculator.createGroups({
-                  calculateWithInadequateGroupCount: generationType.calculateWithInadequateGroupCount,
-              });
+        let groups =
+            generationType.groupCount === 1 //No need for complex generation, if we only care about one group
+                ? groupCalculator.createBasicGroups()
+                : groupCalculator.createGroups({ allowMultipleGirlRooms: generationType.allowMultipleGirlRooms });
         const score = scoreGroups(groups);
         if (score < bestScore) {
             bestGroups = groups;
@@ -162,35 +153,16 @@ generationTypes.forEach((generationType) => {
     printGroupStats(bestGroups);
 
     exportGroups(CONFIG.outputDir, generationType.name, bestGroups);
+
+    return {
+        name: generationType.name,
+        groups: bestGroups,
+        imsc: generationType.imsc,
+        german: generationType.german,
+    };
 });
 
-//Visually distinct colors: https://mokole.com/palette.html
-/*const colorShowed = _.shuffle([
-    '#2f4f4f',
-    '#8b4513',
-    '#191970',
-    '#006400',
-    '#bdb76b',
-    '#b03060',
-    '#ff4500',
-    '#ffa500',
-    '#ffff00',
-    '#0000cd',
-    '#00ff00',
-    '#00fa9a',
-    '#00ffff',
-    '#b0c4de',
-    '#ff00ff',
-    '#1e90ff',
-    '#ee82ee',
-]);
-bestGroups = bestGroups.map((group, index) => {
-    group.map((student) => {
-        //student.color = colorShowed[index];
-        return student;
-    });
-    return group;
-});*/
+exportStats(CONFIG.outputDir, result);
 
 const port = process.env.PORT || 3000;
 

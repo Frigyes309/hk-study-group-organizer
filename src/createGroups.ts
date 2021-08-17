@@ -3,18 +3,19 @@ import chalk from 'chalk';
 
 export class Groups {
     /**
-     * @description Distances between ONLY colored students ( Format: neptun-neptun => Distance )
-     * @private
-     */
-    //private _distances: Map<string, number>;
-
-    /**
      * @description Stores all students with vector values
      * @private
      */
     private _coloredStudents: StudentVector[];
 
     private _grayStudents: StudentVector[];
+
+    /**
+     * @description Filter for the start students, so starts students can be only this colors
+     * This makes sense if we have more colors, then groups to generate.
+     * @private
+     */
+    private _startStudentsColorFilter: string[];
 
     /**
      * @description How many study groups to create
@@ -39,6 +40,21 @@ export class Groups {
         console.log(chalk.cyan('[Info]: '), ` - Female: ${this._grayStudents.filter((s) => s.gender === 'N').length}`);
         console.log(chalk.cyan('[Info]: '), ` - Male:   ${this._grayStudents.filter((s) => s.gender === 'F').length}`);*/
 
+        const colorGroups = _.groupBy(students.filter((s) => s.color !== 'gray').map((s) => s.color));
+
+        const colors = Object.keys(colorGroups)
+            .map((key) => {
+                return { color: key, count: colorGroups[key].length };
+            })
+            .sort((x, y) => x.count - y.count);
+
+        this._startStudentsColorFilter = [];
+        for (let i = 0; i < groupCount; i++) {
+            if (colors.length > 0) {
+                this._startStudentsColorFilter.push(colors.pop()!.color);
+            }
+        }
+
         this._groupCount = groupCount;
     }
 
@@ -59,7 +75,7 @@ export class Groups {
      *       - Than with males make the group counts even
      * @returns StudentVector[][] Student groups created
      */
-    public createGroups(config: { calculateWithInadequateGroupCount: boolean }): StudentVector[][] {
+    public createGroups(config: { allowMultipleGirlRooms: boolean }): StudentVector[][] {
         const startStudent = this.getGroupStartStudents(
             this._coloredStudents.filter((student) => student.trueDormitory),
         );
@@ -75,7 +91,7 @@ export class Groups {
                 process.exit(1);
             }
             //Find her/his roommates
-            const room = this._coloredStudents.filter((student) => student.room === s.room && student.trueDormitory);
+            const room = this._coloredStudents.filter((student) => student.room === s.room);
 
             return [...room];
         });
@@ -90,14 +106,23 @@ export class Groups {
         //we know that this room can't fit any group, by this conditions => Go to the next step
         let inadequateGroupCount = 0;
         //For every group search the closest student room, and put them into that group
-        while (inadequateGroupCount <= groups.length) {
+        while (inadequateGroupCount <= groups.length - 1) {
             //Before each group pass shuffle the groups order, this will result better student distribution
             groups = _.shuffle(groups);
 
+            inadequateGroupCount = 0;
             groups.forEach((group) => {
                 const groupCenter = this.getGroupCenter(group);
+                //For the closest calculation first use the colors we have groups for, (This only makes sense if we have more colors than groups)
+                let filteredRemainingStudents = remainingStudents.filter((s) =>
+                    this._startStudentsColorFilter.includes(s.color),
+                );
+                //Then the rest
+                if (filteredRemainingStudents.length === 0) {
+                    filteredRemainingStudents = remainingStudents;
+                }
                 const closestStudent = _.minBy(
-                    remainingStudents.map((student) => {
+                    filteredRemainingStudents.map((student) => {
                         const dist = Math.sqrt(
                             Math.pow(student.x - groupCenter.x, 2) + Math.pow(student.y - groupCenter.y, 2),
                         );
@@ -119,22 +144,30 @@ export class Groups {
                 //Get her/his roommates
                 const room = remainingStudents.filter((student) => student.room === closestStudent.student.room);
 
-                if (config.calculateWithInadequateGroupCount) {
-                    if (this.getGroupFloor(group) !== Math.floor(room[0].room / 100) * 100) {
-                        //Can't add them because they are in a different floor
-                        inadequateGroupCount++;
-                        //return;
-                    } else if (this.isFemaleRoom(room) && this.groupHasFemaleRoom(group)) {
-                        //Can't add them because this study group already has a female room
-                        inadequateGroupCount++;
-                        //return;
-                    } else {
-                        inadequateGroupCount = 0;
+                if (
+                    //this.getGroupFloor(group) !== Math.floor(room[0].room / 100) * 100 &&
+                    //This room is not on the same floor
+                    group.filter((s) => Math.floor(room[0].room / 100) * 100 == Math.floor(s.room / 100) * 100)
+                        .length === 0
+                ) {
+                    //But no other group exists with this color's
+                    if (groups.flat().filter((s) => s.color === room[0].color).length === 0) {
+                        //Still add this room to this group
                         group.push(...room);
+                    } else {
+                        //Can't add them because they are in a different floor, and there is a group for them
+                        inadequateGroupCount++;
                     }
+                } else if (
+                    this.isFemaleRoom(room) &&
+                    this.groupHasFemaleRoom(group) &&
+                    !config.allowMultipleGirlRooms
+                ) {
+                    //Can't add them because this study group already has a female room
+                    inadequateGroupCount++;
+                    //return;
                 } else {
-                    //TODO: Also when this false, try to get the best color segregation in the groups,
-                    //TODO: now only randomness makes this condition true
+                    inadequateGroupCount = 0;
                     group.push(...room);
                 }
 
@@ -235,7 +268,16 @@ export class Groups {
      * //TODO: Document algorithm
      */
     private getGroupStartStudents(students: StudentVector[]): string[] {
+        //Apply the _startStudentsColorFilter, so start students only can be this colored
+        students = students.filter((s) => this._startStudentsColorFilter.includes(s.color));
+
         if (students.length < this._groupCount) {
+            //If count is not enough do the same color filtering, but with all students
+            students = this._coloredStudents.filter((s) => this._startStudentsColorFilter.includes(s.color));
+        }
+
+        if (students.length < this._groupCount) {
+            //If still not enough we are doomed :/
             console.log(
                 chalk.red('[Create Groups]: '),
                 `Can't create more groups, than students available. Students: ${students.length}, Groups: ${this._groupCount}`,
@@ -323,10 +365,18 @@ export class Groups {
             console.log(chalk.red('[Group Floor]:'), " Can't calculate floor for empty group");
             return NaN;
         }
-        const rooms = Object.keys(_.groupBy(students, (student) => Math.floor(student.room / 100) * 100));
-        if (rooms.length !== 1) {
-            console.log(chalk.red('[Group Floor]:'), ' There are multiple floor students in this group');
-            return NaN;
+        const rooms = _.groupBy(students, (student) => Math.floor(student.room / 100) * 100);
+        if (Object.keys(rooms).length !== 1) {
+            //console.log(chalk.red('[Group Floor]:'), ' There are multiple floor students in this group');
+            //We have more than one color on this floor, get the most common
+            return Number(
+                _.maxBy(
+                    Object.keys(rooms).map((key) => {
+                        return { floor: key, count: rooms[key].length };
+                    }),
+                    (a) => a.count,
+                )!.floor,
+            );
         }
         return Number(rooms[0]);
     }

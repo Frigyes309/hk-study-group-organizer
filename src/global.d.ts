@@ -71,20 +71,13 @@ type GenerationType = {
     imsc: boolean;
     german: boolean;
     groupCount: number; //How many groups to create
-    basicGroup: boolean; //Generate this batch with the basicGroup function, or the regular
-    //If true, in the createGroups function we will exit early if a room is not suitable for any of the groups
-    calculateWithInadequateGroupCount: boolean;
+    basicGroup?: boolean; //Force basic group generation strategy
+    allowMultipleGirlRooms: boolean; //If true we allow multiple girl room (dormitory) in one group
 };
 
-/**
- * @description
- * Each student has a group witch defines the color of a student
- */
-interface Group {
-    /** eg. [ 'DrWu', 'Fekete', 'Nyuszi', 'SIR', 'TTNY' ] */
-    name: string;
-    /** eg. [ 'yellow', 'black', 'blue', 'white', 'red' ] */
-    color: string;
-    /** Where most of the group members can be found in the dormitory */
-    mainFloor: number;
+interface GenerationResult {
+    name: string; //Name of this generation batch
+    groups: StudentVector[][];
+    imsc: boolean;
+    german: boolean;
 }
