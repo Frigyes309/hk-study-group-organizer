@@ -71,7 +71,7 @@ type groupStat = {
     femaleCount: number;
     maleCount: number;
     colors: { color: string; count: number }[]; //All available colors, and it's counts
-    countryRatio: number; //Percentage of non BudaPest students in this group
+    dormitoryRatio: number; //Percentage of dormitory students in this group
 };
 
 /**
@@ -88,6 +88,6 @@ function getGroupStats(group: StudentVector[]): groupStat {
         colors: Object.keys(colorGroups).map((a) => {
             return { color: a, count: colorGroups[a].length };
         }),
-        countryRatio: (group.filter((s) => s.zipCode >= 1000 && s.zipCode <= 1999).length / group.length) * 100,
+        dormitoryRatio: (group.filter((s) => s.trueDormitory).length / group.length) * 100,
     };
 }

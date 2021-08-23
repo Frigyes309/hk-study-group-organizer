@@ -1,7 +1,6 @@
-import express from 'express';
 import path from 'path';
-import _ from 'lodash';
 import chalk from 'chalk';
+import express from 'express';
 import { Bar, Presets } from 'cli-progress';
 import { Students } from './Students';
 import { importStudents } from './studentsImporter';
@@ -11,6 +10,7 @@ import { printGroupStats, scoreGroups } from './scoreGroups';
 import { exportGroups, exportStats } from './export';
 
 const app = express();
+app.use('/public', express.static(path.join(__dirname, '..', 'dist', 'public')));
 // sets ejs views folder
 app.set('views', path.join(__dirname, '../views'));
 // sets view engine
@@ -19,7 +19,7 @@ app.set('view engine', 'ejs');
 const CONFIG = {
     inputDir: '/Users/balint/Documents/GitHub/hk-study-group-organizer/data/',
     outputDir: '/Users/balint/Documents/GitHub/hk-study-group-organizer/data/output',
-    groupGenerationCount: 100, //How many times try to generate a group combination witch will give us the best score
+    groupGenerationCount: 1, //How many times try to generate a group combination witch will give us the best score
     gtbScale: 0.01, //Scale for the gtb vector dimension
 };
 
@@ -53,7 +53,7 @@ const generationTypes: GenerationType[] = [
         major: 'Vill',
         imsc: false,
         german: false,
-        groupCount: 10,
+        groupCount: 7,
         allowMultipleGirlRooms: false,
     },
     {
@@ -61,7 +61,7 @@ const generationTypes: GenerationType[] = [
         major: 'Vill',
         imsc: true,
         german: false,
-        groupCount: 1,
+        groupCount: 2,
         allowMultipleGirlRooms: false,
     },
     {
@@ -77,7 +77,7 @@ const generationTypes: GenerationType[] = [
         major: 'Üzinfó',
         imsc: false,
         german: false,
-        groupCount: 5,
+        groupCount: 4,
         allowMultipleGirlRooms: true,
     },
 ];
@@ -175,5 +175,5 @@ app.get('/', (req, res) => {
 });
 
 app.get('/api/data', (req, res) => {
-    res.json({});
+    res.json(result);
 });

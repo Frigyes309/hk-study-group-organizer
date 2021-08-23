@@ -4,74 +4,16 @@
   <meta charset="UTF-8">
   <title>Title</title>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/css/bootstrap.min.css" integrity="sha384-B0vP5xmATw1+K9KRQjQERJvTumQW0nPEzvF6L/Z6nronJ3oUOFUFpCjEUQouq2+l" crossorigin="anonymous">
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/hammerjs@2.0.8"></script>
-  <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-zoom@1.1.1/dist/chartjs-plugin-zoom.min.js"></script>
+  <!--script src="https://cdn.jsdelivr.net/npm/chart.js"></script-->
 </head>
   <body>
-    <h1 class="text-center text-white">Student group organizer</h1>
-    <div>
+    <h1 class="text-center">Student group organizer</h1>
+    <div id="buttons">
+
+    </div>
+    <div class="mr-5 ml-5">
       <canvas id="myChart"></canvas>
     </div>
-    <script>
-
-      fetch('/api/data').then(response => response.json()).then(data => {
-        window.data = data;
-
-        debugger;
-
-        const chartData = {
-          datasets: data.map(student => {
-            return {
-              label: undefined,
-              data: [{x: student.x ? student.x : 0, y: student.y ? student.y : 0}],
-              pointBackgroundColor: student.trueDormitory ? student.color : student.color,
-              pointRadius: 4,
-              pointHoverRadius: 4,
-            }
-          }),
-          /*datasets: [{
-            label: 'Scatter Dataset',
-            data: data.map(student => { return {x: student.x ? student.x : 0, y: student.y ? student.y : 0}}),
-            pointBackgroundColor: function(context) {
-              return data[context.dataIndex].color;
-            },
-          }],*/
-        };
-        const config = {
-          type: 'scatter',
-          data: chartData,
-          options: {
-            plugins: {
-              legend: {
-                display: false
-              },
-              tooltip: {
-                callbacks: {
-                  label: function(context) {
-                    //return window.data[context.dataIndex];
-                    return [window.data[context.datasetIndex].name, `Room: ${context.parsed.x} - Gtb: ${context.parsed.y.toFixed(2)}`, `Group id: ${window.data[context.datasetIndex].groupId}`]
-                  }
-                }
-              }
-            },
-            scales: {
-              x: {
-                type: 'linear',
-                position: 'bottom',
-                min: 900,
-                max: 920,
-              },
-              y: {
-                //min: 0,
-                //max: 10
-              }
-            }
-          }
-        };
-        const ctx = document.getElementById('myChart').getContext('2d');
-        const myChart = new Chart(ctx, config);
-      })
-    </script>
+    <script src="public/main.js"></script>
   </body>
 </html>

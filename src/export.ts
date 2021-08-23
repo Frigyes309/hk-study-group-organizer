@@ -28,7 +28,7 @@ export function exportGroups(filePath: string, name: string, groups: StudentVect
             ['Nő (db)']: a.stats.femaleCount,
             ['Féfi (db)']: a.stats.maleCount,
             ['Kollégista']: a.stats.dormitoryCount,
-            ['Vidékiek aránya']: `${a.stats.countryRatio.toFixed(2)}%`,
+            ['Kollégisták aránya']: `${a.stats.dormitoryRatio.toFixed(2)}%`,
         };
     });
     let worksheet = utils.json_to_sheet(exportableStats);
@@ -43,6 +43,9 @@ export function exportGroups(filePath: string, name: string, groups: StudentVect
                 ['Név']: student.name,
                 ['Szín']: student.color,
                 ['Koli szoba']: student.trueDormitory ? student.room : '',
+                ['Nem']: student.gender === 'N' ? 'Nő' : 'Férfi',
+                ['Német']: student.german ? 'X' : ' ',
+                ['Imsc']: student.imsc ? 'X' : ' ',
             };
         });
         let sheetName = `${name} - Tankör: ${id + 1}`;
