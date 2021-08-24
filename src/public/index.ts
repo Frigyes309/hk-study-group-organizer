@@ -12,9 +12,9 @@ async function renderData(data: GenerationResult[]) {
     const chartData: ChartData = {
         datasets: data
             .map((generation) => {
-                return generation.groups.map((group, id) => {
+                return generation.groups.map(({ group, label }) => {
                     return {
-                        label: `${generation.name} - Group: ${id + 1}`,
+                        label: `${generation.name} - ${label}`,
                         data: group
                             .filter((s) => s.x !== 0 && s.y !== 0)
                             .map((student) => {
@@ -42,7 +42,6 @@ async function renderData(data: GenerationResult[]) {
                     callbacks: {
                         label: function (context) {
                             //return window.data[context.dataIndex];
-                            debugger;
 
                             const student = (context.raw as { data: StudentVector & { batchName: string } }).data;
                             return [

@@ -34,12 +34,12 @@ function standardDeviation(array: number[]): number {
     return Math.sqrt(_.sum(_.map(array, (i) => Math.pow(i - avg, 2))) / array.length);
 }
 
-export function printGroupStats(groups: StudentVector[][]) {
-    groups.forEach((group, id) => {
+export function printGroupStats(groups: MatchedGroup[]) {
+    groups.forEach(({ group, label }) => {
         let stats = getGroupStats(group);
         console.log(
             chalk.cyan('[Info]:') +
-                chalk.yellow(id.toString().padStart(3, ' ')) +
+                chalk.yellow(label) +
                 '. group => ' +
                 `Dormitory: ${chalk.yellow(stats.dormitoryCount.toString().padStart(2, ' '))} ` +
                 `Female: ${
@@ -59,9 +59,9 @@ export function printGroupStats(groups: StudentVector[][]) {
     console.log(chalk.cyan('[Info]:') + ` Total student count: ${chalk.yellow(groups.flat().length)}`);
 }
 
-export function getGroupsStats(groups: StudentVector[][]) {
-    return groups.map((group, id) => {
-        return { id: id, stats: getGroupStats(group) };
+export function getGroupsStats(groups: MatchedGroup[]) {
+    return groups.map(({ group, label }) => {
+        return { label, stats: getGroupStats(group) };
     });
 }
 

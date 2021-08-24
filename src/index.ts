@@ -8,6 +8,9 @@ import { Groups } from './createGroups';
 import { createVectors, getFloorColors } from './createVector';
 import { printGroupStats, scoreGroups } from './scoreGroups';
 import { exportGroups, exportStats } from './export';
+import { generationTypes } from './generationTypes';
+import { importGroupSeniors } from './dataImporter';
+import { matchSeniorsToGroups } from './matchSeniorsToGroups';
 
 const app = express();
 app.use('/public', express.static(path.join(__dirname, '..', 'dist', 'public')));
@@ -23,75 +26,20 @@ const CONFIG = {
     gtbScale: 0.01, //Scale for the gtb vector dimension
 };
 
-const generationTypes: GenerationType[] = [
-    {
-        name: 'Info General',
-        major: 'Infó',
-        imsc: false,
-        german: false,
-        groupCount: 18,
-        allowMultipleGirlRooms: false,
-    },
-    {
-        name: 'Info IMSC',
-        major: 'Infó',
-        imsc: true,
-        german: false,
-        groupCount: 3,
-        allowMultipleGirlRooms: true,
-    },
-    {
-        name: 'Info German',
-        major: 'Infó',
-        imsc: false,
-        german: true,
-        groupCount: 1,
-        allowMultipleGirlRooms: false,
-    },
-    {
-        name: 'Vill General',
-        major: 'Vill',
-        imsc: false,
-        german: false,
-        groupCount: 7,
-        allowMultipleGirlRooms: false,
-    },
-    {
-        name: 'Vill IMSC',
-        major: 'Vill',
-        imsc: true,
-        german: false,
-        groupCount: 2,
-        allowMultipleGirlRooms: false,
-    },
-    {
-        name: 'Vill German',
-        major: 'Vill',
-        imsc: false,
-        german: true,
-        groupCount: 1,
-        allowMultipleGirlRooms: false,
-    },
-    {
-        name: 'Bprof General',
-        major: 'Üzinfó',
-        imsc: false,
-        german: false,
-        groupCount: 4,
-        allowMultipleGirlRooms: true,
-    },
-];
-
 console.log(chalk.green('[General]: '), 'Program started');
+
+const groupSeniors = importGroupSeniors(path.join(CONFIG.inputDir, 'Tankörsenior_beosztás2021.xlsx'));
 
 importStudents(
     {
-        DH: path.join(CONFIG.inputDir, 'VIK-alapképzés-felvettek-2020A-besoroláshoz.xlsx'),
-        Dorm: path.join(CONFIG.inputDir, 'Bsc-felvettek.xlsx'),
-        GTB: path.join(CONFIG.inputDir, 'GTB-2020-tankörbeosztáshoz.xlsx'),
+        DH: path.join(CONFIG.inputDir, 'VIK alapképzés felvettek 2021A besoroláshoz.xlsx'),
+        Dorm: path.join(CONFIG.inputDir, '2020/Bsc-felvettek.xlsx'), //TODO: This is old data
+        GTB: path.join(CONFIG.inputDir, 'GTB_Tankörbeosztáshoz.xlsx'),
     },
-    'Infó',
+    'Vill',
 );
+let s = Students.instance.getAll();
+debugger;
 const masterFloorColors = getFloorColors();
 
 const result: GenerationResult[] = generationTypes.map((generationType) => {
@@ -99,9 +47,9 @@ const result: GenerationResult[] = generationTypes.map((generationType) => {
     console.log(chalk.cyan(`--------- [${generationType.name}] ---------`));
     importStudents(
         {
-            DH: path.join(CONFIG.inputDir, 'VIK-alapképzés-felvettek-2020A-besoroláshoz.xlsx'),
-            Dorm: path.join(CONFIG.inputDir, 'Bsc-felvettek.xlsx'),
-            GTB: path.join(CONFIG.inputDir, 'GTB-2020-tankörbeosztáshoz.xlsx'),
+            DH: path.join(CONFIG.inputDir, 'VIK alapképzés felvettek 2021A besoroláshoz.xlsx'),
+            Dorm: path.join(CONFIG.inputDir, '2020/Bsc-felvettek.xlsx'), //TODO: This is old data
+            GTB: path.join(CONFIG.inputDir, 'GTB_Tankörbeosztáshoz.xlsx'),
         },
         generationType.major,
         generationType.imsc,
@@ -150,17 +98,21 @@ const result: GenerationResult[] = generationTypes.map((generationType) => {
     }
     progressBar.stop();
 
-    printGroupStats(bestGroups);
+    const matchedGroups = matchSeniorsToGroups(bestGroups, generationType.courseCodes, groupSeniors);
 
-    exportGroups(CONFIG.outputDir, generationType.name, bestGroups);
+    printGroupStats(matchedGroups);
+
+    exportGroups(CONFIG.outputDir, generationType.name, matchedGroups);
 
     return {
         name: generationType.name,
-        groups: bestGroups,
+        groups: matchedGroups,
         imsc: generationType.imsc,
         german: generationType.german,
     };
 });
+
+debugger;
 
 exportStats(CONFIG.outputDir, result);
 

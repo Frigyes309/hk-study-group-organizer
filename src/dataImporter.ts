@@ -135,13 +135,13 @@ export function importDH(path: string, sheetName: string | undefined = undefined
     let sheet = importSheet(
         path,
         {
-            A: 'neptun',
-            B: 'name',
-            C: 'zipCode',
-            D: 'gender',
-            E: 'imsc',
-            F: 'doublePassive',
-            G: 'german',
+            B: 'neptun',
+            C: 'name',
+            D: 'zipCode',
+            E: 'gender',
+            F: 'imsc',
+            G: 'doublePassive',
+            H: 'german',
         },
         sheetName,
     );
@@ -163,4 +163,55 @@ export function importDH(path: string, sheetName: string | undefined = undefined
     });
     // @ts-ignore
     return sheet;
+}
+
+/**
+ * @description Imports an excel file containing all groupSeniors, and their colors.
+ * This later used to map the generated group to the available groupSeniors
+ */
+export function importGroupSeniors(path: string, sheetName: string | undefined = undefined): GroupSeniors[] {
+    let sheet = importSheet(
+        path,
+        {
+            A: 'courseCode',
+            //B: 'day', //Time of the group session
+            //C: 'hours',
+            D: 'instructor',
+            E: 'senior1',
+            F: 'senior2',
+            G: 'senior3',
+            H: 'senior4',
+            I: 'color1',
+            J: 'color2',
+            K: 'color3',
+            L: 'color4',
+        },
+        sheetName,
+    );
+    if (!sheet) {
+        console.log(chalk.red('[Excel Import]: ') + `Can't import group seniors excel file: ${path}`);
+        process.exit(1);
+    }
+
+    const huColor = new Map<string, string>([
+        ['sárga', 'yellow'],
+        ['fekete', 'black'],
+        ['kék', 'blue'],
+        ['fehér', 'white'],
+        ['piros', 'red'],
+    ]);
+
+    return sheet.map((row) => {
+        const seniors = [
+            { senior: row.senior1 as string, color: huColor.get(row.color1) ?? '' },
+            { senior: row.senior2 as string, color: huColor.get(row.color2) ?? '' },
+            { senior: row.senior3 as string, color: huColor.get(row.color3) ?? '' },
+            { senior: row.senior4 as string, color: huColor.get(row.color4) ?? '' },
+        ];
+        return {
+            courseCode: row.courseCode as string,
+            instructor: row.instructor as string,
+            seniors: seniors.filter((s) => s.color && s.senior),
+        };
+    });
 }

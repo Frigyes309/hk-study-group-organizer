@@ -50,8 +50,8 @@ export function importStudents(
             ? huColor.get(studentDorm.color)
             : 'gray';
 
-        //If a student is doublePassive we don't care about her/him, will be grouped next year
-        if (student.doublePassive) return;
+        //We also group double passive students, idk why?
+        //if (student.doublePassive) return;
 
         if (imsc) {
             if (!student.imsc) return;

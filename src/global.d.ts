@@ -5,7 +5,7 @@ type StudentGTB = {
     neptun: string;
     roomSenior: string;
     cardSenior: string;
-    color: string;
+    color: string; //TODO: Make colors strong typed
 };
 
 type StudentDormitory = {
@@ -23,10 +23,16 @@ type StudentDH = {
     name: string;
     zipCode: number;
     /** Gender of this student, stored in a hungarian format (F - Male) (N - Female) */
-    gender: 'F' | 'N';
+    gender: 'F' | 'N'; //TODO: Change gender to ENGLISH format
     imsc: boolean;
     doublePassive: boolean;
     german: boolean;
+};
+
+type GroupSeniors = {
+    courseCode: string;
+    instructor: string;
+    seniors: { senior: string; color: string }[];
 };
 
 type Vector = {
@@ -66,18 +72,30 @@ type VectorOptions = {
 type Major = 'Vill' | 'Infó' | 'Üzinfó';
 
 type GenerationType = {
-    name: string; //Name of this batch, only for display purposes
-    major: Major; //Major for the inport
+    //Name of this batch, only for display purposes
+    name: string;
+    //All courseCodes for this generation, eg.: [I_IMSc1, I_IMSc2, I_IMSc3]
+    courseCodes: string[];
+    //Major for the import
+    major: Major;
     imsc: boolean;
     german: boolean;
-    groupCount: number; //How many groups to create
-    basicGroup?: boolean; //Force basic group generation strategy
-    allowMultipleGirlRooms: boolean; //If true we allow multiple girl room (dormitory) in one group
+    //How many groups to create
+    groupCount: number;
+    //Force basic group generation strategy
+    basicGroup?: boolean;
+    //If true we allow multiple girl room (dormitory) in one group
+    allowMultipleGirlRooms: boolean;
 };
 
 interface GenerationResult {
     name: string; //Name of this generation batch
-    groups: StudentVector[][];
+    groups: MatchedGroup[];
     imsc: boolean;
     german: boolean;
+}
+
+interface MatchedGroup {
+    group: StudentVector[];
+    label: string;
 }
