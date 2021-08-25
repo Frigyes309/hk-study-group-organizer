@@ -202,7 +202,13 @@ export class Groups {
         let grayFemales = this._grayStudents.filter((s) => s.gender === 'N');
         while (grayFemales.length !== 0) {
             //Add a female to the smallest female count group, until we have females left
-            const smallestFemaleCountGroup = _.minBy(groups, (group) => group.filter((s) => s.gender === 'N').length);
+            const smallestFemaleCountGroup = _.minBy(
+                groups.filter((g) => {
+                    //For this 0 female count group only one female is available, skip this group
+                    return !(grayFemales.length < 2 && g.filter((s) => s.gender === 'N').length === 0);
+                }),
+                (group) => group.filter((s) => s.gender === 'N').length,
+            );
             if (!smallestFemaleCountGroup) {
                 console.log(chalk.red('[Gray Female Distribute]: '), 'Smallest count female study group not exists');
                 break;

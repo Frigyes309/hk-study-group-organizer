@@ -22,10 +22,14 @@ export function scoreGroups(groups: StudentVector[][]): number {
         });
     });
 
+    const isImsc = groups[0][0].imsc;
+
     return (
         inSameRoomButNotGroup +
         standardDeviation(groups.map((group) => group.filter((s) => s.trueDormitory).length)) +
-        standardDeviation(groups.map((group) => group.filter((s) => s.gender === 'N').length))
+        standardDeviation(groups.map((group) => group.filter((s) => s.gender === 'N').length)) +
+        //In IMSc groups the group count is soo important, because all groups must stay under 20 Persons, and they almost fill this total cap
+        standardDeviation(groups.map((group) => group.length)) * (isImsc ? 5 : 1)
     );
 }
 

@@ -52,10 +52,10 @@ export function importStudents(
         const studentGTB = infoGTB.find((s) => s.neptun === student.neptun);
         const studentDorm = infoDorm.find((s) => s.neptun === student.neptun);
 
-        const color = studentDorm
-            ? huColor.get(studentDorm.color)
-            : studentGTB
+        const color = studentGTB
             ? huColor.get(studentGTB.color)
+            : studentDorm
+            ? huColor.get(studentDorm.color)
             : 'gray';
 
         if (studentDorm && studentGTB && huColor.get(studentDorm.color) !== huColor.get(studentGTB.color)) {

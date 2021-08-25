@@ -1,5 +1,5 @@
 export const generationTypes: GenerationType[] = [
-    {
+    /*{
         name: 'Info General',
         courseCodes: [
             'I01',
@@ -53,14 +53,14 @@ export const generationTypes: GenerationType[] = [
         german: false,
         groupCount: 8,
         allowMultipleGirlRooms: false,
-    },
+    },*/
     {
         name: 'Vill IMSC',
-        courseCodes: ['V_IMSc1', 'V_IMSc2'],
+        courseCodes: ['V_IMSc1', 'V_IMSc2', 'V_IMSc3'],
         major: 'Vill',
         imsc: true,
         german: false,
-        groupCount: 2,
+        groupCount: 3,
         allowMultipleGirlRooms: false,
     },
     /*{
@@ -71,7 +71,7 @@ export const generationTypes: GenerationType[] = [
         german: true,
         groupCount: 1,
         allowMultipleGirlRooms: false,
-    },*/
+    },
     {
         name: 'Bprof General',
         courseCodes: ['BPI01', 'BPI07 (BPI02)', 'BPI08 (BPI03)'],
@@ -80,5 +80,5 @@ export const generationTypes: GenerationType[] = [
         german: false,
         groupCount: 3,
         allowMultipleGirlRooms: true,
-    },
+    },*/
 ];

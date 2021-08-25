@@ -55,6 +55,7 @@ export function exportGroups(filePath: string, name: string, groups: MatchedGrou
                     ['Nem']: student.gender === 'N' ? 'Nő' : 'Férfi',
                     ['Szoba Senior']: student.roomSenior,
                     ['Kártya Senior']: student.cardSenior,
+                    ['Dupla passzív']: student.doublePassive ? 'X' : '',
                 };
             });
             //exportableGroup.sort((a, b) => a['Szoba Senior'].localeCompare(a['Szoba Senior']));
