@@ -36,7 +36,7 @@ export function getFloorColors(): { color: string; floor: number; cards: string[
         Students.instance.getAllBy((student) => student.cardSenior !== ''),
         'color',
     );
-    Object.keys(gtbColorGroups).forEach((color) => {
+    Object.keys(gtbColorGroups).map((color) => {
         let obj = colors.find((c) => c.color === color);
         if (obj) {
             obj.cards.push(...Object.keys(_.groupBy(gtbColorGroups[color], 'cardSenior')));
@@ -46,6 +46,7 @@ export function getFloorColors(): { color: string; floor: number; cards: string[
                 `No matching GTB ${color}, and Dormitory ${colors.map((c) => c.color).join()} colors found`,
             );
         }
+        return obj;
     });
     return colors;
 }

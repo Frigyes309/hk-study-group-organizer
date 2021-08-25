@@ -11,7 +11,7 @@ import _ from 'lodash';
  * @param name Name of this batch of export(student groups), also the file will be saved on this name
  * @param groups The groups to export
  */
-export function exportGroups(filePath: string, name: string, groups: MatchedGroup[]) {
+export function exportGroups(filePath: string, name: string, groups: MatchedGroup[], desiredColors: GroupSeniors[]) {
     let wb = utils.book_new();
     wb.Props = {
         Title: name,
@@ -29,10 +29,12 @@ export function exportGroups(filePath: string, name: string, groups: MatchedGrou
             ['Féfi (db)']: a.stats.maleCount,
             ['Kollégista']: a.stats.dormitoryCount,
             ['Kollégisták aránya']: `${a.stats.dormitoryRatio.toFixed(2)}%`,
+            ['Volt GTB-ben']: a.stats.gtbCount,
             ['Szín']: a.stats.colors
                 .map((c) => c.color)
                 .filter((c) => c !== 'gray')
                 .join(', '),
+            ['Kívánt szín']: desiredColors.filter((b) => b.courseCode === a.label)[0].desiredColor,
         };
     });
     exportableStats.sort((x, y) => x['Tankör'].localeCompare(y['Tankör']));
@@ -40,27 +42,29 @@ export function exportGroups(filePath: string, name: string, groups: MatchedGrou
     worksheet['!cols'] = fitToColumn(exportableStats);
     wb.Sheets['Statisztika'] = worksheet;
 
-    groups.forEach(({ group, label }, id) => {
-        //Convert the required fields to hungarian names
-        const exportableGroup = group.map((student) => {
-            return {
-                Neptun: student.neptun,
-                ['Név']: student.name,
-                ['Szín']: student.color,
-                ['Koli szoba']: student.trueDormitory ? student.room : '',
-                ['Nem']: student.gender === 'N' ? 'Nő' : 'Férfi',
-                ['Szoba Senior']: student.roomSenior,
-                ['Kártya Senior']: student.cardSenior,
-            };
-        });
-        //exportableGroup.sort((a, b) => a['Szoba Senior'].localeCompare(a['Szoba Senior']));
-        let sheetName = `${name} - ${label}`;
-        wb.SheetNames.push(sheetName);
-        let worksheet = utils.json_to_sheet(exportableGroup);
-        worksheet['!cols'] = fitToColumn(exportableGroup);
+    groups
+        .sort((x, y) => x.label.localeCompare(y.label))
+        .forEach(({ group, label }, id) => {
+            //Convert the required fields to hungarian names
+            const exportableGroup = group.map((student) => {
+                return {
+                    Neptun: student.neptun,
+                    ['Név']: student.name,
+                    ['Szín']: student.color,
+                    ['Koli szoba']: student.trueDormitory ? student.room : '',
+                    ['Nem']: student.gender === 'N' ? 'Nő' : 'Férfi',
+                    ['Szoba Senior']: student.roomSenior,
+                    ['Kártya Senior']: student.cardSenior,
+                };
+            });
+            //exportableGroup.sort((a, b) => a['Szoba Senior'].localeCompare(a['Szoba Senior']));
+            let sheetName = `${name} - ${label}`;
+            wb.SheetNames.push(sheetName);
+            let worksheet = utils.json_to_sheet(exportableGroup);
+            worksheet['!cols'] = fitToColumn(exportableGroup);
 
-        wb.Sheets[sheetName] = worksheet;
-    });
+            wb.Sheets[sheetName] = worksheet;
+        });
     writeFile(wb, path.join(filePath, name + '.xlsx'), {
         bookType: 'xlsx',
     });
@@ -80,10 +84,10 @@ export function exportStats(filePath: string, generationData: GenerationResult[]
 
     wb.SheetNames.push('Statisztika');
 
-    generationData = generationData.map((generation) => {
+    /*generationData = generationData.map((generation) => {
         generation.groups.map(({ group }) => recolorGroup(group));
         return generation;
-    });
+    });*/
 
     const exportableData = generationData.map((generation) => {
         const colors = _.groupBy(generation.groups, ({ group }) => group[0].color);

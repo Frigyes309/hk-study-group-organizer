@@ -9,13 +9,9 @@ type StudentGTB = {
 };
 
 type StudentDormitory = {
-    name: string;
-    neptun: string;
-    score: number;
-    major: string;
-    admissionType: string;
-    color: string;
     room: number;
+    neptun: string;
+    color: string;
 };
 
 type StudentDH = {
@@ -33,6 +29,7 @@ type GroupSeniors = {
     courseCode: string;
     instructor: string;
     seniors: { senior: string; color: string }[];
+    desiredColor: string | undefined;
 };
 
 type Vector = {

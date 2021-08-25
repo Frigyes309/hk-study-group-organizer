@@ -63,7 +63,7 @@ export const generationTypes: GenerationType[] = [
         groupCount: 2,
         allowMultipleGirlRooms: false,
     },
-    {
+    /*{
         name: 'Vill German',
         courseCodes: ['VNÉMET'],
         major: 'Vill',
@@ -71,7 +71,7 @@ export const generationTypes: GenerationType[] = [
         german: true,
         groupCount: 1,
         allowMultipleGirlRooms: false,
-    },
+    },*/
     {
         name: 'Bprof General',
         courseCodes: ['BPI01', 'BPI07 (BPI02)', 'BPI08 (BPI03)'],

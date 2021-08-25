@@ -56,7 +56,9 @@ export function printGroupStats(groups: MatchedGroup[]) {
                 (stats.femaleCount === 1 ? chalk.red(' <--- ONLY FEMALE HERE!') : ''),
         );
     });
-    console.log(chalk.cyan('[Info]:') + ` Total student count: ${chalk.yellow(groups.flat().length)}`);
+    console.log(
+        chalk.cyan('[Info]:') + ` Total student count: ${chalk.yellow(groups.map((g) => g.group).flat().length)}`,
+    );
 }
 
 export function getGroupsStats(groups: MatchedGroup[]) {
@@ -72,6 +74,7 @@ type groupStat = {
     maleCount: number;
     colors: { color: string; count: number }[]; //All available colors, and it's counts
     dormitoryRatio: number; //Percentage of dormitory students in this group
+    gtbCount: number;
 };
 
 /**
@@ -89,5 +92,6 @@ function getGroupStats(group: StudentVector[]): groupStat {
             return { color: a, count: colorGroups[a].length };
         }),
         dormitoryRatio: (group.filter((s) => s.trueDormitory).length / group.length) * 100,
+        gtbCount: group.filter((s) => s.roomSenior !== '').length,
     };
 }

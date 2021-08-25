@@ -1,4 +1,5 @@
 import chalk from 'chalk';
+import _ from 'lodash';
 
 export function matchSeniorsToGroups(
     groups: StudentVector[][],
@@ -18,12 +19,20 @@ export function matchSeniorsToGroups(
     const seniorGroupsCount = groups.map((group) => {
         return {
             group,
+            color: _.head(
+                _(group.map((s) => s.color).filter((a) => a !== 'gray'))
+                    .countBy()
+                    .entries()
+                    .maxBy(_.last),
+            ),
             courseCodes: courseCodes
                 .map((c) => {
                     return {
                         code: c,
+                        //Get group's color => Most frequent color in the group
+                        desiredColor: seniors.filter((a) => a.courseCode === c)[0].desiredColor,
                         count: group
-                            .map((student) => [student.cardSenior, student.roomSenior])
+                            .map((student) => [/*student.cardSenior,*/ student.roomSenior])
                             .flat()
                             .filter((a) =>
                                 seniors
@@ -33,23 +42,31 @@ export function matchSeniorsToGroups(
                             ).length,
                     };
                 })
-                .sort((x, y) => x.count - y.count),
+                .sort((x, y) => y.count - x.count),
         };
     });
 
     return seniorGroupsCount
         .sort((a, b) => {
             //courseCodes got sorted in the previous step
-            return a.courseCodes[0].count - b.courseCodes[0].count;
+            return b.courseCodes[0].count - a.courseCodes[0].count;
         })
         .map((group) => {
-            const highestCode = group.courseCodes
+            let highestCode = group.courseCodes
                 .filter((code) => !usedCourseCodes.includes(code.code))
+                .filter((code) => code.desiredColor === group.color)
                 .sort((x, y) => x.count - y.count)
                 .pop();
             if (!highestCode) {
+                //Do the same, but with no color filter
+                highestCode = group.courseCodes
+                    .filter((code) => !usedCourseCodes.includes(code.code))
+                    .sort((x, y) => x.count - y.count)
+                    .pop();
+            }
+            if (!highestCode) {
+                debugger;
                 console.log(chalk.red('[Seniors to Groups]: '), "Can't get highest code count");
-
                 throw new Error("Can't get highest code count");
             }
             usedCourseCodes.push(highestCode.code);

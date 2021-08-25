@@ -9,7 +9,7 @@ import { createVectors, getFloorColors } from './createVector';
 import { printGroupStats, scoreGroups } from './scoreGroups';
 import { exportGroups, exportStats } from './export';
 import { generationTypes } from './generationTypes';
-import { importGroupSeniors } from './dataImporter';
+import { importGroupSeniors, importGTB } from './dataImporter';
 import { matchSeniorsToGroups } from './matchSeniorsToGroups';
 
 const app = express();
@@ -22,8 +22,8 @@ app.set('view engine', 'ejs');
 const CONFIG = {
     inputDir: '/Users/balint/Documents/GitHub/hk-study-group-organizer/data/',
     outputDir: '/Users/balint/Documents/GitHub/hk-study-group-organizer/data/output',
-    groupGenerationCount: 1, //How many times try to generate a group combination witch will give us the best score
-    gtbScale: 0.01, //Scale for the gtb vector dimension
+    groupGenerationCount: 1000, //How many times try to generate a group combination witch will give us the best score
+    gtbScale: 0.1, //Scale for the gtb vector dimension
 };
 
 console.log(chalk.green('[General]: '), 'Program started');
@@ -32,14 +32,14 @@ const groupSeniors = importGroupSeniors(path.join(CONFIG.inputDir, 'Tankörseni
 
 importStudents(
     {
-        DH: path.join(CONFIG.inputDir, 'VIK alapképzés felvettek 2021A besoroláshoz.xlsx'),
-        Dorm: path.join(CONFIG.inputDir, '2020/Bsc-felvettek.xlsx'), //TODO: This is old data
+        DH: path.join(CONFIG.inputDir, 'DH_VIK alapképzés felvettek 2021A besoroláshoz.xlsx'),
+        Dorm: path.join(CONFIG.inputDir, 'Koli_BSc_gólya_beosztás_tankörhöz.xlsx'),
         GTB: path.join(CONFIG.inputDir, 'GTB_Tankörbeosztáshoz.xlsx'),
     },
-    'Vill',
+    'All',
 );
-let s = Students.instance.getAll();
-debugger;
+//const infoGTB = importGTB(path.join(CONFIG.inputDir, 'GTB_Tankörbeosztáshoz.xlsx'));
+//let s = Students.instance.getAll();
 const masterFloorColors = getFloorColors();
 
 const result: GenerationResult[] = generationTypes.map((generationType) => {
@@ -47,8 +47,8 @@ const result: GenerationResult[] = generationTypes.map((generationType) => {
     console.log(chalk.cyan(`--------- [${generationType.name}] ---------`));
     importStudents(
         {
-            DH: path.join(CONFIG.inputDir, 'VIK alapképzés felvettek 2021A besoroláshoz.xlsx'),
-            Dorm: path.join(CONFIG.inputDir, '2020/Bsc-felvettek.xlsx'), //TODO: This is old data
+            DH: path.join(CONFIG.inputDir, 'DH_VIK alapképzés felvettek 2021A besoroláshoz.xlsx'),
+            Dorm: path.join(CONFIG.inputDir, 'Koli_BSc_gólya_beosztás_tankörhöz.xlsx'),
             GTB: path.join(CONFIG.inputDir, 'GTB_Tankörbeosztáshoz.xlsx'),
         },
         generationType.major,
@@ -80,11 +80,18 @@ const result: GenerationResult[] = generationTypes.map((generationType) => {
         const groupCalculator = new Groups(
             createVectors(Students.instance.getAll(), { gtbScale: CONFIG.gtbScale, masterColors: masterFloorColors }),
             generationType.groupCount,
+            //TODO: This desired color is duplicate
+            groupSeniors.filter((g) => generationType.courseCodes.includes(g.courseCode)).map((a) => a.desiredColor),
         );
         let groups =
             generationType.groupCount === 1 //No need for complex generation, if we only care about one group
                 ? groupCalculator.createBasicGroups()
-                : groupCalculator.createGroups({ allowMultipleGirlRooms: generationType.allowMultipleGirlRooms });
+                : groupCalculator.createGroups({
+                      allowMultipleGirlRooms: generationType.allowMultipleGirlRooms,
+                      desiredColors: groupSeniors
+                          .filter((g) => generationType.courseCodes.includes(g.courseCode))
+                          .map((a) => a.desiredColor),
+                  });
         const score = scoreGroups(groups);
         if (score < bestScore) {
             bestGroups = groups;
@@ -102,7 +109,12 @@ const result: GenerationResult[] = generationTypes.map((generationType) => {
 
     printGroupStats(matchedGroups);
 
-    exportGroups(CONFIG.outputDir, generationType.name, matchedGroups);
+    exportGroups(
+        CONFIG.outputDir,
+        generationType.name,
+        matchedGroups,
+        groupSeniors.filter((g) => generationType.courseCodes.includes(g.courseCode)),
+    );
 
     return {
         name: generationType.name,
@@ -111,8 +123,6 @@ const result: GenerationResult[] = generationTypes.map((generationType) => {
         german: generationType.german,
     };
 });
-
-debugger;
 
 exportStats(CONFIG.outputDir, result);
 

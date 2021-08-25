@@ -101,13 +101,13 @@ export function importDormitory(
     let sheet = importSheet(
         path,
         {
-            A: 'name',
-            D: 'neptun',
-            G: 'score',
-            I: 'major',
-            K: 'admissionType',
-            L: 'color',
-            M: 'room',
+            A: 'room',
+            B: 'neptun',
+            C: 'color',
+            //A: 'name',
+            //G: 'score',
+            //I: 'major',
+            //K: 'admissionType',
         },
         sheetName,
     );
@@ -185,6 +185,7 @@ export function importGroupSeniors(path: string, sheetName: string | undefined =
             J: 'color2',
             K: 'color3',
             L: 'color4',
+            N: 'desiredColor',
         },
         sheetName,
     );
@@ -212,6 +213,7 @@ export function importGroupSeniors(path: string, sheetName: string | undefined =
             courseCode: row.courseCode as string,
             instructor: row.instructor as string,
             seniors: seniors.filter((s) => s.color && s.senior),
+            desiredColor: huColor.get(row.desiredColor) ? huColor.get(row.desiredColor) : undefined,
         };
     });
 }

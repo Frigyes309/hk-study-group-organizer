@@ -27,7 +27,7 @@ export class Groups {
      * @param students Students array, with it's vector values
      * @param groupCount How many student groups to create
      */
-    public constructor(students: StudentVector[], groupCount: number) {
+    public constructor(students: StudentVector[], groupCount: number, desiredColors: (string | undefined)[]) {
         this._coloredStudents = students.filter((s) => s.color !== 'gray');
         this._grayStudents = students.filter((s) => s.color === 'gray');
 
@@ -40,7 +40,9 @@ export class Groups {
         console.log(chalk.cyan('[Info]: '), ` - Female: ${this._grayStudents.filter((s) => s.gender === 'N').length}`);
         console.log(chalk.cyan('[Info]: '), ` - Male:   ${this._grayStudents.filter((s) => s.gender === 'F').length}`);*/
 
-        const colorGroups = _.groupBy(students.filter((s) => s.color !== 'gray').map((s) => s.color));
+        const colorGroups = _.groupBy(
+            students.filter((s) => s.color !== 'gray' && desiredColors.includes(s.color)).map((s) => s.color),
+        );
 
         const colors = Object.keys(colorGroups)
             .map((key) => {
@@ -75,9 +77,13 @@ export class Groups {
      *       - Than with males make the group counts even
      * @returns StudentVector[][] Student groups created
      */
-    public createGroups(config: { allowMultipleGirlRooms: boolean }): StudentVector[][] {
+    public createGroups(config: {
+        allowMultipleGirlRooms: boolean;
+        desiredColors: (string | undefined)[];
+    }): StudentVector[][] {
         const startStudent = this.getGroupStartStudents(
             this._coloredStudents.filter((student) => student.trueDormitory),
+            config.desiredColors,
         );
         if (!startStudent) {
             console.log(chalk.red('[Create Groups]: '), 'Group start students are empty');
@@ -267,13 +273,18 @@ export class Groups {
      * They will be the starting point of each group
      * //TODO: Document algorithm
      */
-    private getGroupStartStudents(students: StudentVector[]): string[] {
-        //Apply the _startStudentsColorFilter, so start students only can be this colored
-        students = students.filter((s) => this._startStudentsColorFilter.includes(s.color));
+    private getGroupStartStudents(students: StudentVector[], desiredColors: (string | undefined)[]): string[] {
+        students = students
+            //Apply the _startStudentsColorFilter, so start students only can be this colored
+            .filter((s) => this._startStudentsColorFilter.includes(s.color))
+            //Apply the desired colors filter, in this step this is necessary for the first two students generation
+            .filter((s) => desiredColors.includes(s.color));
 
         if (students.length < this._groupCount) {
             //If count is not enough do the same color filtering, but with all students
-            students = this._coloredStudents.filter((s) => this._startStudentsColorFilter.includes(s.color));
+            students = this._coloredStudents
+                //.filter((s) => this._startStudentsColorFilter.includes(s.color))
+                .filter((s) => desiredColors.includes(s.color));
         }
 
         if (students.length < this._groupCount) {
@@ -306,21 +317,36 @@ export class Groups {
         }
         startStudents.push(...maxTwo[0].split('-'));
 
+        //Remove the start students two colors from the desired colors list
+        students
+            .filter((s) => startStudents.includes(s.neptun))
+            .map((s) => s.color)
+            .forEach((color) => {
+                desiredColors.splice(desiredColors.indexOf(color), 1);
+            });
+
         while (startStudents.length !== this._groupCount) {
             const newStartStudent = _.maxBy(
-                students.map((student) => {
-                    return _.minBy(
-                        startStudents.map((startStudent) => {
-                            return {
-                                distance: startStudents.includes(student.neptun)
-                                    ? 0
-                                    : distances.get(student.neptun + '-' + startStudent) ?? Infinity,
-                                neptun: student.neptun,
-                            };
-                        }),
-                        (s) => s.distance,
-                    );
-                }),
+                students
+                    .filter((student) => {
+                        //Do not filter if we don't care about the desired color aka. == undefined
+                        if (desiredColors.every((e) => !e)) return true;
+                        return desiredColors.includes(student.color);
+                    })
+                    .map((student) => {
+                        return _.minBy(
+                            startStudents.map((startStudent) => {
+                                return {
+                                    distance: startStudents.includes(student.neptun)
+                                        ? 0
+                                        : distances.get(student.neptun + '-' + startStudent) ?? Infinity,
+                                    neptun: student.neptun,
+                                    color: student.color,
+                                };
+                            }),
+                            (s) => s.distance,
+                        );
+                    }),
                 (s: { distance: number; neptun: string } | undefined) => (s ? s.distance : 0),
             );
             if (!newStartStudent) {
@@ -330,6 +356,8 @@ export class Groups {
                 );
                 break;
             }
+            //Remove from desiredColors
+            desiredColors.splice(desiredColors.indexOf(newStartStudent.color), 1);
             startStudents.push(newStartStudent.neptun);
         }
         return startStudents;
