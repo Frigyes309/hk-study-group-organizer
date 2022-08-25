@@ -20,11 +20,12 @@ export const generationTypes: GenerationType[] = [
             'I16',
             'I17',
             'I18',
+            'I19',
         ],
         major: 'Infó',
         imsc: false,
         german: false,
-        groupCount: 18,
+        groupCount: 19,
         allowMultipleGirlRooms: false,
     },
     {
@@ -38,34 +39,34 @@ export const generationTypes: GenerationType[] = [
     },
     {
         name: 'Info German',
-        courseCodes: ['INÉMET'],
+        courseCodes: ['I_NÉMET'],
         major: 'Infó',
         imsc: false,
         german: true,
         groupCount: 1,
         allowMultipleGirlRooms: false,
-    },
+    },*/
     {
         name: 'Vill General',
-        courseCodes: ['V01', 'V02', 'V03', 'V04', 'V07 (V05)', 'V08 (V06)', 'V09 (V07)', 'V10 (V08)'],
+        courseCodes: ['V01', 'V02', 'V03', 'V04', 'V05', 'V06', 'V07', 'V08'],
         major: 'Vill',
         imsc: false,
         german: false,
         groupCount: 8,
-        allowMultipleGirlRooms: false,
-    },*/
-    {
+        allowMultipleGirlRooms: true,
+    },
+    /*{
         name: 'Vill IMSC',
-        courseCodes: ['V_IMSc1', 'V_IMSc2', 'V_IMSc3'],
+        courseCodes: ['V_IMSc1', 'V_IMSc2'],
         major: 'Vill',
         imsc: true,
         german: false,
-        groupCount: 3,
+        groupCount: 2,
         allowMultipleGirlRooms: false,
     },
-    /*{
+    {
         name: 'Vill German',
-        courseCodes: ['VNÉMET'],
+        courseCodes: ['V_NÉMET'],
         major: 'Vill',
         imsc: false,
         german: true,
@@ -74,7 +75,7 @@ export const generationTypes: GenerationType[] = [
     },
     {
         name: 'Bprof General',
-        courseCodes: ['BPI01', 'BPI07 (BPI02)', 'BPI08 (BPI03)'],
+        courseCodes: ['BPI01', 'BPI02', 'BPI03'],
         major: 'Üzinfó',
         imsc: false,
         german: false,

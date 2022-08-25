@@ -73,6 +73,7 @@ export function matchSeniorsToGroups(
             return {
                 group: group.group,
                 label: highestCode.code,
+                groupColor: group.color as string,
             };
         });
 }

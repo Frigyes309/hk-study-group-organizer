@@ -84,6 +84,7 @@ export function exportStats(filePath: string, generationData: GenerationResult[]
     };
 
     wb.SheetNames.push('Statisztika');
+    wb.SheetNames.push('MergedData');
 
     /*generationData = generationData.map((generation) => {
         generation.groups.map(({ group }) => recolorGroup(group));
@@ -105,10 +106,30 @@ export function exportStats(filePath: string, generationData: GenerationResult[]
         };
     });
 
-    let worksheet = utils.json_to_sheet(exportableData);
+    let mergedData: {}[] = [];
+
+    generationData.forEach((gen) => {
+        gen.groups.forEach((group) => {
+            group.group.forEach((student) => {
+                mergedData.push({
+                    ['Tankör']: group.label,
+                    ['Neptun']: student.neptun,
+                    ['Név']: student.name,
+                    ['Szín']: student.color !== 'gray' ? student.color : group.groupColor,
+                });
+            });
+        });
+    });
+
+    const worksheet = utils.json_to_sheet(exportableData);
     worksheet['!cols'] = fitToColumn(exportableData);
     wb.Sheets['Statisztika'] = worksheet;
-    writeFile(wb, path.join(filePath, 'GenerationSummary' + '.xlsx'), {
+
+    const mergedWorkSheet = utils.json_to_sheet(mergedData);
+    mergedWorkSheet['!cols'] = fitToColumn(mergedData);
+    wb.Sheets['MergedData'] = mergedWorkSheet;
+
+    writeFile(wb, path.join(filePath, 'GenerationMerged' + '.xlsx'), {
         bookType: 'xlsx',
     });
 }

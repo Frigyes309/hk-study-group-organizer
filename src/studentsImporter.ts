@@ -67,6 +67,7 @@ export function importStudents(
         }
 
         //We also group double passive students, idk why?
+        //Double passive means, she/he had a double passive start, so actually starting the university this year rather than the last one
         //if (student.doublePassive) return;
 
         if (major !== 'All') {

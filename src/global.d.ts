@@ -94,5 +94,6 @@ interface GenerationResult {
 
 interface MatchedGroup {
     group: StudentVector[];
+    groupColor: string;
     label: string;
 }

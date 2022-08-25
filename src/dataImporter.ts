@@ -46,7 +46,7 @@ function importSheet(
         if (keys.length > 1) {
             console.error(
                 chalk.red('[Excel Import]: ') +
-                    `No sheet name is provided for import and there are multiple sheets: [${keys.join()}]`,
+                    `No sheet name is provided for import and there are multiple sheets: [${keys.join()}], importing the first one`,
             );
         }
         //In excel at least one sheet is always present

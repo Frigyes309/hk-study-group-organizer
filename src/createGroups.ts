@@ -26,6 +26,7 @@ export class Groups {
     /**
      * @param students Students array, with it's vector values
      * @param groupCount How many student groups to create
+     * @param desiredColors
      */
     public constructor(students: StudentVector[], groupCount: number, desiredColors: (string | undefined)[]) {
         this._coloredStudents = students.filter((s) => s.color !== 'gray');
@@ -112,7 +113,7 @@ export class Groups {
         //we know that this room can't fit any group, by this conditions => Go to the next step
         let inadequateGroupCount = 0;
         //For every group search the closest student room, and put them into that group
-        while (inadequateGroupCount <= groups.length - 1) {
+        while (remainingStudents.length !== 0) {
             //Before each group pass shuffle the groups order, this will result better student distribution
             groups = _.shuffle(groups);
 
@@ -159,6 +160,7 @@ export class Groups {
                     //But no other group exists with this color's
                     if (groups.flat().filter((s) => s.color === room[0].color).length === 0) {
                         //Still add this room to this group
+                        inadequateGroupCount = 0;
                         group.push(...room);
                     } else {
                         //Can't add them because they are in a different floor, and there is a group for them
@@ -196,6 +198,9 @@ export class Groups {
                     }
                 }
             });
+        }
+        if (remainingStudents.length !== 0) {
+            console.log('HE?');
         }
 
         //Distribute gray females equally in the study groups

@@ -22,19 +22,19 @@ app.set('view engine', 'ejs');
 const CONFIG = {
     inputDir: '/Users/balint/Documents/GitHub/hk-study-group-organizer/data/',
     outputDir: '/Users/balint/Documents/GitHub/hk-study-group-organizer/data/output',
-    groupGenerationCount: 1000, //How many times try to generate a group combination witch will give us the best score
+    groupGenerationCount: 200, //How many times try to generate a group combination witch will give us the best score
     gtbScale: 0.1, //Scale for the gtb vector dimension
 };
 
 console.log(chalk.green('[General]: '), 'Program started');
 
-const groupSeniors = importGroupSeniors(path.join(CONFIG.inputDir, 'Tankörsenior_beosztás2021.xlsx'));
+const groupSeniors = importGroupSeniors(path.join(CONFIG.inputDir, 'Tankörsenior_beosztás_2022.xlsx'));
 
 importStudents(
     {
-        DH: path.join(CONFIG.inputDir, 'DH_VIK alapképzés felvettek 2021A besoroláshoz.xlsx'),
-        Dorm: path.join(CONFIG.inputDir, 'Koli_BSc_gólya_beosztás_tankörhöz.xlsx'),
-        GTB: path.join(CONFIG.inputDir, 'GTB_Tankörbeosztáshoz.xlsx'),
+        DH: path.join(CONFIG.inputDir, 'DH_VIK_2022A.xlsx'),
+        Dorm: path.join(CONFIG.inputDir, 'Koli_szobabeosztas_HK_2022.xlsx'),
+        GTB: path.join(CONFIG.inputDir, 'GTB_Beosztás_2022.xlsx'),
     },
     'All',
 );
@@ -47,9 +47,9 @@ const result: GenerationResult[] = generationTypes.map((generationType) => {
     console.log(chalk.cyan(`--------- [${generationType.name}] ---------`));
     importStudents(
         {
-            DH: path.join(CONFIG.inputDir, 'DH_VIK alapképzés felvettek 2021A besoroláshoz.xlsx'),
-            Dorm: path.join(CONFIG.inputDir, 'Koli_BSc_gólya_beosztás_tankörhöz.xlsx'),
-            GTB: path.join(CONFIG.inputDir, 'GTB_Tankörbeosztáshoz.xlsx'),
+            DH: path.join(CONFIG.inputDir, 'DH_VIK_2022A.xlsx'),
+            Dorm: path.join(CONFIG.inputDir, 'Koli_szobabeosztas_HK_2022.xlsx'),
+            GTB: path.join(CONFIG.inputDir, 'GTB_Beosztás_2022.xlsx'),
         },
         generationType.major,
         generationType.imsc,
