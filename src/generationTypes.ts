@@ -45,7 +45,7 @@ export const generationTypes: GenerationType[] = [
         german: true,
         groupCount: 1,
         allowMultipleGirlRooms: false,
-    },*/
+    },
     {
         name: 'Vill General',
         courseCodes: ['V01', 'V02', 'V03', 'V04', 'V05', 'V06', 'V07', 'V08'],
@@ -54,8 +54,8 @@ export const generationTypes: GenerationType[] = [
         german: false,
         groupCount: 8,
         allowMultipleGirlRooms: true,
-    },
-    /*{
+    },*/
+    {
         name: 'Vill IMSC',
         courseCodes: ['V_IMSc1', 'V_IMSc2'],
         major: 'Vill',
@@ -64,22 +64,22 @@ export const generationTypes: GenerationType[] = [
         groupCount: 2,
         allowMultipleGirlRooms: false,
     },
-    {
-        name: 'Vill German',
-        courseCodes: ['V_NÉMET'],
-        major: 'Vill',
-        imsc: false,
-        german: true,
-        groupCount: 1,
-        allowMultipleGirlRooms: false,
-    },
-    {
-        name: 'Bprof General',
-        courseCodes: ['BPI01', 'BPI02', 'BPI03'],
-        major: 'Üzinfó',
-        imsc: false,
-        german: false,
-        groupCount: 3,
-        allowMultipleGirlRooms: true,
-    },*/
+    // {
+    //     name: 'Vill German',
+    //     courseCodes: ['V_NÉMET'],
+    //     major: 'Vill',
+    //     imsc: false,
+    //     german: true,
+    //     groupCount: 1,
+    //     allowMultipleGirlRooms: false,
+    // },
+    // {
+    //     name: 'Bprof General',
+    //     courseCodes: ['BPI01', 'BPI02', 'BPI03', 'BPI04'],
+    //     major: 'Üzinfó',
+    //     imsc: false,
+    //     german: false,
+    //     groupCount: 4,
+    //     allowMultipleGirlRooms: true,
+    // },
 ];

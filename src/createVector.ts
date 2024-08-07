@@ -1,5 +1,5 @@
-import _ from 'lodash';
 import chalk from 'chalk';
+import _ from 'lodash';
 import { Students } from './Students';
 
 /**
@@ -14,6 +14,7 @@ export function getFloorColors(): { color: string; floor: number; cards: string[
         Students.instance.getAllBy((student) => student.room !== 0),
         (student) => Math.floor(student.room / 100),
     );
+    console.log(chalk.green('[Floor Colors]: '), Students.instance.getAllBy((student) => student.room !== 0).length);
     Object.keys(floors).forEach((floorId) => {
         //Get all students color from this floor
         const floorColors = floors[floorId].map((student) => student.color);
@@ -28,6 +29,7 @@ export function getFloorColors(): { color: string; floor: number; cards: string[
             );
         }
     });
+    console.log(chalk.green('[Floor Colors]: '), colors);
 
     /**
      * For each color/floor get the card seniors from GTB
@@ -121,7 +123,8 @@ export function createVectors(students: Student[], options: VectorOptions): Stud
         // She/He has both => Nothing to do
 
         if (isNaN(Number(gtb))) {
-            console.log(chalk.red('[Vector Creation]: '), 'Gtb vector axis must be a number, something went wrong');
+            //console.log(chalk.red('[Vector Creation]: '), 'Gtb vector axis must be a number, something went wrong');
+            gtb = '0';
         }
 
         student.room = room;

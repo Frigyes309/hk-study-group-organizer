@@ -1,5 +1,5 @@
-import _ from 'lodash';
 import chalk from 'chalk';
+import _ from 'lodash';
 
 export class Groups {
     /**
@@ -129,21 +129,27 @@ export class Groups {
                     filteredRemainingStudents = remainingStudents;
                 }
                 const closestStudent = _.minBy(
-                    filteredRemainingStudents.map((student) => {
-                        const dist = Math.sqrt(
-                            Math.pow(student.x - groupCenter.x, 2) + Math.pow(student.y - groupCenter.y, 2),
-                        );
-                        return { student, dist };
-                    }),
+                    filteredRemainingStudents
+                        .map((student) => {
+                            if (student.x === undefined || student.y === undefined) {
+                                console.log(`[Create Groups]: Student ${student.neptun} has no vector value`);
+                                return null; // Filter out invalid students
+                            }
+                            const dist = Math.sqrt(
+                                Math.pow(student.x - groupCenter.x, 2) + Math.pow(student.y - groupCenter.y, 2),
+                            );
+                            return { student, dist };
+                        })
+                        .filter(Boolean), // Remove null values from the array
                     'dist',
                 );
 
                 if (!closestStudent) {
                     if (remainingStudents.length !== 0) {
-                        console.log(
-                            chalk.red('[Create Groups]: '),
-                            'Closest student must exist, there are still remaining students',
-                        );
+                        // console.log(
+                        //     chalk.red('[Create Groups]: '),
+                        //     'Closest student must exist, there are still remaining students',
+                        // );
                     }
                     return;
                 }
@@ -335,16 +341,25 @@ export class Groups {
             .forEach((color) => {
                 desiredColors.splice(desiredColors.indexOf(color), 1);
             });
-
+        const GC = this._groupCount;
         while (startStudents.length !== this._groupCount) {
             const newStartStudent = _.maxBy(
-                students
-                    .filter((student) => {
-                        //Do not filter if we don't care about the desired color aka. == undefined
-                        if (desiredColors.every((e) => !e)) return true;
-                        return desiredColors.includes(student.color);
-                    })
-                    .map((student) => {
+                (function () {
+                    const filteredStudents = students.filter((student) => desiredColors.includes(student.color));
+                    const initialFilteredCount = filteredStudents.length;
+
+                    if (initialFilteredCount < GC) {
+                        const additionalStudentsNeeded = GC - initialFilteredCount;
+                        const remainingStudents = students.filter((student) => !desiredColors.includes(student.color));
+                        filteredStudents.push(...remainingStudents.slice(0, additionalStudentsNeeded));
+                        console.log(
+                            `NEPTUN of student who were swapped: ${remainingStudents
+                                .slice(0, additionalStudentsNeeded)
+                                .map((s) => s.neptun)}`,
+                        );
+                    }
+
+                    return filteredStudents.map((student) => {
                         return _.minBy(
                             startStudents.map((startStudent) => {
                                 return {
@@ -357,9 +372,11 @@ export class Groups {
                             }),
                             (s) => s.distance,
                         );
-                    }),
-                (s: { distance: number; neptun: string } | undefined) => (s ? s.distance : 0),
+                    });
+                })(),
+                (s) => (s ? s.distance : 0),
             );
+
             if (!newStartStudent) {
                 console.log(
                     chalk.red('[Create Group]:'),

@@ -1,23 +1,19 @@
 {
-  "ts-node": {
-    "files": true
-  },
-  "compilerOptions": {
-    "watch": false,
-    "target": "ES2017",
-    "module": "CommonJS",
-    "moduleResolution": "Node",
-    "lib": [
-      "dom",
-      "es2019"
-    ],
-    "declaration": true,
-    "sourceMap": true,
-    "outDir": "./dist" ,
-    "rootDir": "./src" ,
-    "strict": true ,
-    "esModuleInterop": true,
-    "skipLibCheck": true,
-    "forceConsistentCasingInFileNames": true
-  }
+    "ts-node": {
+        "files": true
+    },
+    "compilerOptions": {
+        "target": "ES2017",
+        "module": "CommonJS",
+        "moduleResolution": "Node",
+        "lib": ["dom", "es2019"],
+        "declaration": true,
+        "sourceMap": true,
+        "outDir": "./dist",
+        "rootDir": "./src",
+        "strict": true,
+        "esModuleInterop": true,
+        "skipLibCheck": true,
+        "forceConsistentCasingInFileNames": true
+    }
 }

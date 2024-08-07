@@ -8,6 +8,10 @@ export function matchSeniorsToGroups(
 ): MatchedGroup[] {
     if (courseCodes.length !== groups.length) {
         console.log(chalk.red('[Seniors to Groups]: '), 'Groups and course codes length are different');
+        console.error(
+            chalk.red('[Seniors to Groups]: '),
+            `Groups: ${groups.length}, courseCodes: ${courseCodes.length}`,
+        );
         throw new Error('Groups and course codes length are different');
     }
 
