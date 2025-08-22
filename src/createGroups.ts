@@ -86,10 +86,10 @@ export class Groups {
             this._coloredStudents.filter((student) => student.trueDormitory),
             config.desiredColors,
         );
-        if (!startStudent) {
+        /*if (startStudent.length === 0) {
             console.log(chalk.red('[Create Groups]: '), 'Group start students are empty');
             return [];
-        }
+        }*/
         //Each study groups will be an array of students
         let groups = startStudent.map((neptun) => {
             const s = this._coloredStudents.find((s) => s.neptun === neptun);

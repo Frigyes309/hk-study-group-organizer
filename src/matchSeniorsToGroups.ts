@@ -21,6 +21,7 @@ export function matchSeniorsToGroups(
     //For each group we count how many card, or room seniors are match to the group senior candidates
     //Then for each group senior candidates we choose the highest available group
     const seniorGroupsCount = groups.map((group) => {
+        console.log(courseCodes.filter((s) => s.length == 5));
         return {
             group,
             color: _.head(
@@ -34,7 +35,10 @@ export function matchSeniorsToGroups(
                     return {
                         code: c,
                         //Get group's color => Most frequent color in the group
-                        desiredColor: seniors.filter((a) => a.courseCode === c)[0].desiredColor,
+                        desiredColor:
+                            seniors.filter((a) => a.courseCode == c) == undefined
+                                ? 'gray'
+                                : seniors.filter((a) => a.courseCode == c)[0].desiredColor,
                         count: group
                             .map((student) => [/*student.cardSenior,*/ student.roomSenior])
                             .flat()

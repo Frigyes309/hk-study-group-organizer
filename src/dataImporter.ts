@@ -116,7 +116,7 @@ export function importDormitory(
         return undefined;
     }
     //Convert the neptun code to uppercase format
-    sheet.map((row) => {
+    sheet.slice(0, 256).map((row) => {
         return {
             ...row,
             neptun: row.neptun.toUpperCase(),
@@ -176,16 +176,16 @@ export function importGroupSeniors(path: string, sheetName: string | undefined =
             A: 'courseCode',
             //B: 'day', //Time of the group session
             //C: 'hours',
-            D: 'instructor',
-            G: 'senior1',
-            I: 'senior2',
-            K: 'senior3',
-            M: 'senior4',
-            H: 'color1',
-            J: 'color2',
+            E: 'instructor',
+            F: 'senior1',
+            G: 'senior2',
+            H: 'senior3',
+            I: 'senior4',
+            J: 'color1',
+            K: 'color2',
             L: 'color3',
-            N: 'color4',
-            O: 'desiredColor',
+            M: 'color4',
+            B: 'desiredColor',
         },
         sheetName,
     );

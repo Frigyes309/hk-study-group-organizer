@@ -77,20 +77,34 @@ const result: GenerationResult[] = generationTypes.map((generationType) => {
 
     //From n generation get the best groups
     for (let i = 0; i < CONFIG.groupGenerationCount; i++) {
+        let fff: GroupSeniors['desiredColor'][] = [];
+        switch (generationType.courseCodes[0]) {
+            case 'I_IMSc1':
+                fff = ['white', 'black', 'yellow'];
+                break;
+            case 'V_IMSc1':
+                fff = ['white', 'yellow'];
+                break;
+            case 'BPI01':
+                fff = ['yellow', 'white'];
+                break;
+            default:
+                fff = groupSeniors
+                    .filter((g) => generationType.courseCodes.includes(g.courseCode))
+                    .map((a) => a.desiredColor);
+        }
         const groupCalculator = new Groups(
             createVectors(Students.instance.getAll(), { gtbScale: CONFIG.gtbScale, masterColors: masterFloorColors }),
             generationType.groupCount,
             //TODO: This desired color is duplicate
-            groupSeniors.filter((g) => generationType.courseCodes.includes(g.courseCode)).map((a) => a.desiredColor),
+            fff,
         );
         let groups =
             generationType.groupCount === 1 //No need for complex generation, if we only care about one group
                 ? groupCalculator.createBasicGroups()
                 : groupCalculator.createGroups({
                       allowMultipleGirlRooms: generationType.allowMultipleGirlRooms,
-                      desiredColors: groupSeniors
-                          .filter((g) => generationType.courseCodes.includes(g.courseCode))
-                          .map((a) => a.desiredColor),
+                      desiredColors: fff,
                   });
         const score = scoreGroups(groups);
         if (score < bestScore) {
